@@ -74,5 +74,12 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
     {
         return $this->hasMany(Evaluacion::class, 'id_usuario', 'id_usuario');
     }
-}
 
+    /**
+     * Un usuario puede ser un propietario.
+     */
+    public function propietario()
+    {
+        return $this->hasOne(Propietario::class, 'id_propietario', 'id_usuario');
+    }
+}

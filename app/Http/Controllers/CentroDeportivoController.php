@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CentroDeportivo;
+use App\Models\Propietario;
 use App\Http\Requests\CentroDeportivoRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,9 +18,12 @@ class CentroDeportivoController extends Controller
     {
         $propietario = Auth::user()->propietario;
         
+        // Si no existe el registro de propietario, crearlo automáticamente
         if (!$propietario) {
-            return redirect()->route('propietario.dashboard')
-                ->with('error', 'Debes completar tu perfil de propietario primero.');
+            $propietario = Propietario::create([
+                'id_propietario' => Auth::user()->id_usuario,
+                'estado' => 'aprobado'
+            ]);
         }
 
         $centros = CentroDeportivo::where('id_propietario', $propietario->id_propietario)
@@ -44,9 +48,12 @@ class CentroDeportivoController extends Controller
     {
         $propietario = Auth::user()->propietario;
         
+        // Si no existe el registro de propietario, crearlo automáticamente
         if (!$propietario) {
-            return redirect()->route('propietario.dashboard')
-                ->with('error', 'Debes completar tu perfil de propietario primero.');
+            $propietario = Propietario::create([
+                'id_propietario' => Auth::user()->id_usuario,
+                'estado' => 'aprobado'
+            ]);
         }
 
         // Manejar la subida de fotos

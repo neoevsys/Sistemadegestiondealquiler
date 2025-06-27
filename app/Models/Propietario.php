@@ -26,7 +26,7 @@ class Propietario extends Model
     // Define la relación con el modelo User
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id_usuario');
+        return $this->belongsTo(User::class, 'id_propietario', 'id_usuario');
     }
 
     /**

@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\PropietarioController;
 use Illuminate\Support\Facades\Route;
 
 // Rutas de autenticación generadas por Breeze (login, register, etc.)
@@ -17,16 +19,10 @@ Route::get('/dashboard', function () {
 // --- Nuevas rutas para dashboards específicos de rol ---
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard para clientes
-    Route::get('/cliente/dashboard', function () {
-        // Aquí puedes cargar una vista específica para clientes
-        return view('cliente.dashboard');
-    })->name('cliente.dashboard');
+    Route::get('/cliente/dashboard', [ClienteController::class, 'dashboard'])->name('cliente.dashboard');
     
     // Dashboard para propietarios
-    Route::get('/propietario/dashboard', function () {
-        // Aquí puedes cargar una vista específica para propietarios
-        return view('propietario.dashboard');
-    })->name('propietario.dashboard');
+    Route::get('/propietario/dashboard', [PropietarioController::class, 'dashboard'])->name('propietario.dashboard');
     
     // Rutas para propietarios
     Route::prefix('propietario')->name('propietario.')->group(function () {
