@@ -1,3 +1,5 @@
+echo "Host: $SSH_HOST"
+
 name: 🚀 Deploy automático a QAS o Producción
 
 on:
