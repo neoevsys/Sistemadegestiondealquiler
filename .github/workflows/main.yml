@@ -1,0 +1,44 @@
+name: 🚀 Deploy automático a QAS o Producción
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: Configurar SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H -p 22 ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Definir carpeta de destino según rama
+        id: set-path
+        run: |
+          echo "DEPLOY_PATH=/home/ygktituk/alquilamelo.run/" >> $GITHUB_ENV
+
+      - name: Sincronizar archivos con rsync
+        run: |
+          rsync -avzr --delete \
+            --exclude '.git*' \
+            --exclude '.sql*' \
+            --exclude 'public/storage/' \
+            --exclude 'test/' \
+            --exclude 'public/' \
+            --exclude 'bootstrap/' \
+            --exclude 'storage/' \
+            --exclude 'config/' \
+            --exclude 'node_modules/' \
+            --exclude 'vendor/' \
+            --exclude '.env' \
+            --exclude '.htaccess' \
+            --exclude '.github/' \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.DEPLOY_PATH }}
