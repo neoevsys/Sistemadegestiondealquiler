@@ -21,11 +21,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Aquí puedes cargar una vista específica para clientes
         return view('cliente.dashboard');
     })->name('cliente.dashboard');
+    
     // Dashboard para propietarios
     Route::get('/propietario/dashboard', function () {
         // Aquí puedes cargar una vista específica para propietarios
         return view('propietario.dashboard');
     })->name('propietario.dashboard');
+    
+    // Rutas para propietarios
+    Route::prefix('propietario')->name('propietario.')->group(function () {
+        // Rutas de centros deportivos
+        Route::resource('centros', \App\Http\Controllers\CentroDeportivoController::class);
+        
+        // Ruta adicional para toggle de estado
+        Route::patch('centros/{centro}/toggle-status', 
+                    [\App\Http\Controllers\CentroDeportivoController::class, 'toggleStatus'])
+                    ->name('centros.toggle-status');
+    });
+    
     // Rutas de perfil (generadas por Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

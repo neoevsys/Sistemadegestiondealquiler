@@ -28,4 +28,12 @@ class Propietario extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id_usuario');
     }
+
+    /**
+     * Un propietario puede tener muchos centros deportivos.
+     */
+    public function centrosDeportivos()
+    {
+        return $this->hasMany(CentroDeportivo::class, 'id_propietario', 'id_propietario');
+    }
 }
