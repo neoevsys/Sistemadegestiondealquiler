@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CentroDeportivo;
 use App\Models\Propietario;
+use App\Models\TipoDeporte;
 use App\Http\Requests\CentroDeportivoRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -14,23 +15,67 @@ class CentroDeportivoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $propietario = Auth::user()->propietario;
-        
-        // Si no existe el registro de propietario, crearlo automáticamente
-        if (!$propietario) {
-            $propietario = Propietario::create([
-                'id_propietario' => Auth::user()->id_usuario,
-                'estado' => 'aprobado'
-            ]);
+        // Si es la ruta privada del propietario
+        if ($request->routeIs('propietario.centros.index')) {
+            $user = Auth::user();
+            $propietario = $user->propietario;
+            $centros = $propietario ? $propietario->centrosDeportivos()->with('instalaciones')->paginate(12) : collect();
+            return view('propietario.centros.index', compact('centros'));
         }
 
-        $centros = CentroDeportivo::where('id_propietario', $propietario->id_propietario)
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
+        // Obtener ciudades únicas de la base de datos
+        $ciudades = CentroDeportivo::select('ciudad')->distinct()->orderBy('ciudad')->pluck('ciudad');
+        // Obtener deportes únicos de la base de datos
+        $tiposDeportes = \App\Models\TipoDeporte::orderBy('nombre')->get();
 
-        return view('propietario.centros.index', compact('centros'));
+        // Query base
+        $query = CentroDeportivo::query();
+
+        // Filtro por ciudad
+        if ($request->filled('ciudad')) {
+            $query->where('ciudad', $request->ciudad);
+        }
+        // Filtro por deporte (al menos una instalación de ese deporte)
+        if ($request->filled('deporte')) {
+            $query->whereHas('instalaciones.tipoDeporte', function($q) use ($request) {
+                $q->where('nombre', $request->deporte);
+            });
+        }
+        // Filtro por fecha (opcional, aquí solo como placeholder, lógica real depende de reservas y disponibilidad)
+        if ($request->filled('fecha')) {
+            // Aquí podrías filtrar centros con instalaciones disponibles en esa fecha
+            // Ejemplo: $query->whereHas('instalaciones.horariosDisponibilidad', ...)
+        }
+        // Filtro por rango de precio (en instalaciones)
+        if ($request->filled('precio')) {
+            $query->whereHas('instalaciones', function($q) use ($request) {
+                if ($request->precio == '1') {
+                    $q->where('precio_por_hora', '<', 20);
+                } elseif ($request->precio == '2') {
+                    $q->whereBetween('precio_por_hora', [20, 40]);
+                } elseif ($request->precio == '3') {
+                    $q->where('precio_por_hora', '>', 40);
+                }
+            });
+        }
+        // Filtro por valoración
+        if ($request->filled('valoracion')) {
+            $query->where('calificacion_promedio', '>=', floatval($request->valoracion));
+        }
+
+        // Cargar centros paginados
+        $centros = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
+
+        // Si la ruta es /centros, mostrar la vista de centros, si es /, mostrar welcome
+        if ($request->routeIs('centros.index')) {
+            return view('centros.index', compact('centros', 'ciudades', 'tiposDeportes'));
+        }
+        return view('welcome', [
+            'ciudades' => $ciudades,
+            'deportes' => $tiposDeportes->pluck('nombre'),
+        ]);
     }
 
     /**
@@ -47,7 +92,7 @@ class CentroDeportivoController extends Controller
     public function store(CentroDeportivoRequest $request)
     {
         $propietario = Auth::user()->propietario;
-        
+
         // Si no existe el registro de propietario, crearlo automáticamente
         if (!$propietario) {
             $propietario = Propietario::create([
@@ -93,8 +138,17 @@ class CentroDeportivoController extends Controller
     public function show(CentroDeportivo $centro)
     {
         $this->authorize('view', $centro);
-        
+
         return view('propietario.centros.show', compact('centro'));
+    }
+
+    /**
+     * Mostrar el detalle público de un centro deportivo.
+     */
+    public function showPublic($id)
+    {
+        $centro = \App\Models\CentroDeportivo::with(['instalaciones.tipoDeporte', 'evaluaciones'])->findOrFail($id);
+        return view('centros.show', compact('centro'));
     }
 
     /**
@@ -103,7 +157,7 @@ class CentroDeportivoController extends Controller
     public function edit(CentroDeportivo $centro)
     {
         $this->authorize('update', $centro);
-        
+
         return view('propietario.centros.edit', compact('centro'));
     }
 
@@ -116,7 +170,7 @@ class CentroDeportivoController extends Controller
 
         // Manejar la actualización de fotos
         $fotos = $centro->fotos ?? [];
-        
+
         if ($request->hasFile('fotos')) {
             foreach ($request->file('fotos') as $foto) {
                 $path = $foto->store('centros/' . $centro->id_propietario, 'public');
@@ -184,7 +238,7 @@ class CentroDeportivoController extends Controller
         $this->authorize('update', $centro);
 
         $nuevoEstado = $centro->estado === 'activo' ? 'inactivo' : 'activo';
-        
+
         $centro->update(['estado' => $nuevoEstado]);
 
         return back()->with('success', 'Estado del centro actualizado a: ' . ucfirst($nuevoEstado));

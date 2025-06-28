@@ -14,182 +14,151 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="{{ asset('images/logo.webp') }}">
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
 
-<body class="font-sans antialiased min-h-screen flex flex-col">
+<body class="font-sans antialiased min-h-screen flex flex-col justify-between">
     <!-- Barra de Navegación Global -->
-    <nav class="bg-black border-b border-gray-100 shadow-sm">
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <!-- Logo y Nombre de la Plataforma -->
-                    <div class="shrink-0 flex items-center">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
                         <a href="{{ route('home') }}" class="flex items-center">
-                            <!-- Añadimos 'flex items-center' aquí -->
-                            <!-- Tu Logo -->
-                            <img src="{{ asset('images/logo.webp') }}"
-                                alt="{{ config('app.name', 'Mi Plataforma') }} Logo" class="block h-10 w-auto">
-                            <!-- Ajusta h-10 según el tamaño deseado -->
-                            <!-- Nombre de la Plataforma -->
-                            <span class="ml-3 text-2xl font-bold text-white">
-                                <!-- Ajusta ml-3 y text-2xl según el tamaño deseado -->
+                            <img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name', 'Mi Plataforma') }} Logo"
+                                class="block h-10 w-auto">
+                            <span class="ml-3 text-xl font-bold text-gray-800">
                                 {{ config('app.name', 'Mi Plataforma') }}
                             </span>
                         </a>
                     </div>
                 </div>
-
-                <!-- Menú de Navegación (Alineado a la derecha) -->
-                <div class="hidden sm:flex sm:items-center sm:ml-6">
-                    @auth
-                        <!-- Enlaces para usuarios autenticados -->
-                        <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                            {{ __('Inicio') }}
-                        </x-nav-link>
-                        @if (Auth::user()->tipo_usuario === 'cliente')
-                            <x-nav-link :href="route('cliente.dashboard')" :active="request()->routeIs('cliente.dashboard')">
-                                {{ __('Mi Dashboard') }}
-                            </x-nav-link>
-                        @elseif(Auth::user()->tipo_usuario === 'propietario')
-                            <x-nav-link :href="route('propietario.dashboard')" :active="request()->routeIs('propietario.dashboard')">
-                                {{ __('Mi Negocio') }}
-                            </x-nav-link>
-                        @elseif(Auth::user()->tipo_usuario === 'administrador')
-                            <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                                {{ __('Administración') }}
-                            </x-nav-link>
-                        @endif
-                        <x-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">
-                            {{ __('Perfil') }}
-                        </x-nav-link>
-
-                        <!-- Dropdown de Usuario (Logout) -->
-                        <x-dropdown align="right" width="48">
-                            <x-slot name="trigger">
-                                <button
-                                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                                    <div>{{ Auth::user()->nombre }}</div>
-                                    <div class="ml-1">
-                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                </button>
-                            </x-slot>
-
-                            <x-slot name="content">
-                                <!-- Authentication -->
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <x-dropdown-link :href="route('logout')"
-                                        onclick="event.preventDefault();
-                                                        this.closest('form').submit();">
-                                        {{ __('Cerrar Sesión') }}
-                                    </x-dropdown-link>
-                                </form>
-                            </x-slot>
-                        </x-dropdown>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="{{ route('home') }}"
+                            class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                            Inicio
+                        </a>
+                        <a href="{{ route('centros.index') }}"
+                            class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                            Centros Deportivos
+                        </a>
+                        <a href="{{ route('instalaciones.index') }}"
+                            class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                            Instalaciones
+                        </a>
+                        <a href="{{ route('tipos_deportes.index') }}"
+                            class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                            Deportes
+                        </a>
+                        <a href="#contacto"
+                            class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                            Contacto
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    @guest
+                    <a href="{{ route('login') }}"
+                        class="bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
+                        Iniciar Sesión
+                    </a>
+                    <a href="{{ route('register') }}"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                        Registrarse
+                    </a>
                     @else
-                        <!-- Enlaces para usuarios no autenticados -->
-                        <x-nav-link :href="route('login')" :active="request()->routeIs('login')">
-                            {{ __('Iniciar Sesión') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('register')" :active="request()->routeIs('register')">
-                            {{ __('Registrarse') }}
-                        </x-nav-link>
-                    @endauth
-                </div>
-
-                <!-- Hamburger (para móviles) -->
-                <div class="-mr-2 flex items-center sm:hidden">
-                    <button @click="open = ! open"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                            <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
-                                stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h16" />
-                            <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden"
-                                stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" type="button" class="flex items-center bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg text-sm font-medium text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            <svg class="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Hola, {{ Auth::user()->nombre }}
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-cloak @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                            <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Perfil</a>
+                            @if(Auth::user()->tipo_usuario === 'cliente')
+                                <a href="{{ route('reservas.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Mis Reservas</a>
+                            @elseif(Auth::user()->tipo_usuario === 'propietario')
+                                <a href="{{ route('propietario.centros.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Mis Centros</a>
+                                <a href="{{ route('propietario.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Panel Propietario</a>
+                            @endif
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50">Cerrar Sesión</button>
+                            </form>
+                        </div>
+                    </div>
+                    @endguest
                 </div>
             </div>
-        </div>
-
-        <!-- Menú Responsivo (para móviles) -->
-        <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
-            <div class="pt-2 pb-3 space-y-1">
-                @auth
-                    <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                        {{ __('Inicio') }}
-                    </x-responsive-nav-link>
-                    @if (Auth::user()->tipo_usuario === 'cliente')
-                        <x-responsive-nav-link :href="route('cliente.dashboard')" :active="request()->routeIs('cliente.dashboard')">
-                            {{ __('Mi Dashboard') }}
-                        </x-responsive-nav-link>
-                    @elseif(Auth::user()->tipo_usuario === 'propietario')
-                        <x-responsive-nav-link :href="route('propietario.dashboard')" :active="request()->routeIs('propietario.dashboard')">
-                            {{ __('Mi Negocio') }}
-                        </x-responsive-nav-link>
-                    @elseif(Auth::user()->tipo_usuario === 'administrador')
-                        <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                            {{ __('Administración') }}
-                        </x-responsive-nav-link>
-                    @endif
-                    <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">
-                        {{ __('Perfil') }}
-                    </x-responsive-nav-link>
-                @else
-                    <x-responsive-nav-link :href="route('login')" :active="request()->routeIs('login')">
-                        {{ __('Iniciar Sesión') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('register')" :active="request()->routeIs('register')">
-                        {{ __('Registrarse') }}
-                    </x-responsive-nav-link>
-                @endauth
-            </div>
-
-            @auth
-                <div class="pt-4 pb-1 border-t border-gray-200">
-                    <div class="px-4">
-                        <div class="font-medium text-base text-gray-800">{{ Auth::user()->nombre }}</div>
-                        <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-                    </div>
-
-                    <div class="mt-3 space-y-1">
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <x-responsive-nav-link :href="route('logout')"
-                                onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Cerrar Sesión') }}
-                            </x-responsive-nav-link>
-                        </form>
-                    </div>
-                </div>
-            @endauth
         </div>
     </nav>
 
     <!-- Contenido Principal de la Página -->
-    <main class="flex-grow">
+    <main class="mt-16">
         @yield('content')
     </main>
 
-    <!-- Footer Global -->
-    <footer class="bg-black text-white py-6 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p>&copy; {{ date('Y') }} {{ config('app.name', 'Mi Plataforma') }}. Todos los derechos reservados.
-            </p>
-            <div class="mt-2 text-sm">
-                <a href="#" class="text-gray-400 hover:text-white mx-2">Política de Privacidad</a>
-                <span class="text-gray-500">|</span>
-                <a href="#" class="text-gray-400 hover:text-white mx-2">Términos de Servicio</a>
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12" id="contacto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name', 'Mi Plataforma') }} Logo"
+                            class="w-8 h-8 rounded-lg">
+                        <span class="ml-2 text-lg font-bold">
+                            {{ config('app.name', 'Mi Plataforma') }}
+                        </span>
+                    </div>
+                    <p class="text-gray-400">
+                        La plataforma líder en gestión y alquiler de centros deportivos.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Plataforma</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="{{ route('centros.index') }}"
+                                class="hover:text-white transition-colors">Buscar Canchas</a></li>
+                        <li><a href="{{ route('propietario.dashboard') }}"
+                                class="hover:text-white transition-colors">Gestión</a></li>
+                        <li><a href="#"
+                                class="hover:text-white transition-colors">Precios</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Soporte</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#"
+                                class="hover:text-white transition-colors">Centro de Ayuda</a></li>
+                        <li><a href="#contacto"
+                                class="hover:text-white transition-colors">Contacto</a></li>
+                        <li><a href="#"
+                                class="hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contacto</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>📧 info@tusitio.com</li>
+                        <li>📞 +51 900 123 456</li>
+                        <li>📍 Lima, Perú</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; {{ date('Y') }} {{ config('app.name', 'Mi Plataforma') }}. Todos los derechos reservados.
+                </p>
             </div>
         </div>
     </footer>

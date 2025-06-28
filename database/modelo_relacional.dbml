@@ -1,0 +1,216 @@
+Table usuarios {
+  id int [pk, increment]
+  nombre varchar(100)
+  apellido varchar(100)
+  email varchar(150) [unique]
+  password varchar(255)
+  telefono varchar(20)
+  fecha_nacimiento date
+  ruc_dni varchar(20) [unique]
+  tipo_usuario_id int [ref: > tipos_usuario.id]
+  estado_id int [ref: > estados_usuario.id]
+  foto_perfil varchar(255)
+  fecha_registro timestamp
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Table tipos_usuario {
+  id int [pk, increment]
+  nombre varchar(50) // cliente, propietario, administrador
+}
+
+Table estados_usuario {
+  id int [pk, increment]
+  nombre varchar(50) // activo, inactivo, suspendido
+}
+
+Table propietarios {
+  id int [pk, ref: > usuarios.id]
+  estado_id int [ref: > estados_propietario.id]
+  logo_negocio varchar(255)
+  nombre_negocio varchar(200)
+  descripcion_negocio text
+  telefono_negocio varchar(20)
+  email_negocio varchar(150)
+  direccion_negocio text
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Table estados_propietario {
+  id int [pk, increment]
+  nombre varchar(50) // pendiente, aprobado, rechazado
+}
+
+Table centros_deportivos {
+  id int [pk, increment]
+  propietario_id int [ref: > propietarios.id]
+  nombre varchar(200)
+  descripcion text
+  direccion text
+  ciudad varchar(100)
+  distrito varchar(100)
+  codigo_postal varchar(10)
+  telefono varchar(20)
+  email varchar(150)
+  latitud decimal(10,8)
+  longitud decimal(11,8)
+  servicios_adicionales text
+  politicas text
+  calificacion_promedio decimal(3,2)
+  estado_id int [ref: > estados_centro.id]
+  fecha_registro timestamp
+  fotos json
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+
+  Indexes {
+    (latitud, longitud)
+    ciudad
+    distrito
+    codigo_postal
+  }
+}
+
+Table estados_centro {
+  id int [pk, increment]
+  nombre varchar(50) // activo, inactivo, mantenimiento
+}
+
+Table tipos_deportes {
+  id int [pk, increment]
+  nombre varchar(100) [unique]
+  descripcion text
+  equipamiento_requerido text
+  icono_imagen varchar(255)
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table instalaciones {
+  id int [pk, increment]
+  centro_id int [ref: > centros_deportivos.id]
+  nombre varchar(200)
+  descripcion text
+  capacidad_maxima int
+  precio_por_hora decimal(8,2)
+  superficie varchar(50)
+  dimensiones varchar(100)
+  equipamiento_incluido text
+  estado_id int [ref: > estados_instalacion.id]
+  fotos json
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Table instalacion_tipo_deporte {
+  instalacion_id int [ref: > instalaciones.id]
+  tipo_deporte_id int [ref: > tipos_deportes.id]
+  // Tabla pivot para relación N:M entre instalaciones y tipos_deportes
+  Note: 'Tabla pivot para relación N:M entre instalaciones y tipos_deportes'
+}
+
+Table estados_instalacion {
+  id int [pk, increment]
+  nombre varchar(50) // disponible, mantenimiento, fuera_servicio
+}
+
+Table horarios_disponibilidad {
+  id int [pk, increment]
+  instalacion_id int [ref: > instalaciones.id]
+  dia_semana varchar(20)
+  hora_inicio time
+  hora_fin time
+  estado_id int [ref: > estados_horario.id]
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (instalacion_id, dia_semana, hora_inicio, hora_fin) [unique]
+  }
+}
+
+Table estados_horario {
+  id int [pk, increment]
+  nombre varchar(50) // disponible, ocupado, bloqueado
+}
+
+Table reservas {
+  id int [pk, increment]
+  usuario_id int [ref: > usuarios.id]
+  instalacion_id int [ref: > instalaciones.id]
+  fecha_reserva date
+  hora_inicio time
+  hora_fin time
+  duracion_horas decimal(3,1)
+  precio_total decimal(8,2)
+  estado_id int [ref: > estados_reserva.id]
+  fecha_creacion timestamp
+  fecha_modificacion timestamp
+  observaciones text
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+
+  Indexes {
+    (instalacion_id, fecha_reserva, hora_inicio, hora_fin)
+  }
+}
+
+Table estados_reserva {
+  id int [pk, increment]
+  nombre varchar(50) // pendiente, confirmada, completada, cancelada
+}
+
+Table pagos {
+  id int [pk, increment]
+  reserva_id int [ref: > reservas.id, unique]
+  monto decimal(8,2)
+  metodo_pago_id int [ref: > metodos_pago.id]
+  estado_id int [ref: > estados_pago.id]
+  fecha_pago timestamp
+  referencia_transaccion varchar(100) [unique]
+  comprobante varchar(255)
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table metodos_pago {
+  id int [pk, increment]
+  nombre varchar(50) // efectivo, tarjeta, transferencia, yape, plin
+}
+
+Table estados_pago {
+  id int [pk, increment]
+  nombre varchar(50) // pendiente, completado, fallido, reembolsado
+}
+
+Table evaluaciones {
+  id int [pk, increment]
+  usuario_id int [ref: > usuarios.id]
+  centro_id int [ref: > centros_deportivos.id]
+  reserva_id int [ref: > reservas.id, unique]
+  calificacion int
+  comentario text
+  fecha_evaluacion timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+// Relaciones y cardinalidad
+// usuarios 1--* propietarios
+// usuarios 1--* reservas
+// usuarios 1--* evaluaciones
+// propietarios 1--* centros_deportivos
+// centros_deportivos 1--* instalaciones
+// tipos_deportes 1--* instalaciones
+// instalaciones 1--* horarios_disponibilidad
+// instalaciones 1--* reservas
+// reservas 1--1 pagos
+// reservas 1--1 evaluaciones
+// centros_deportivos 1--* evaluaciones
