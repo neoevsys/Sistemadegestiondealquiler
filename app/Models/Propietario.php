@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Propietario extends Model
 {
     use HasFactory;
-    protected $primaryKey = 'id_propietario'; // Especifica la clave primaria
+    protected $primaryKey = 'id'; // La clave primaria real es 'id', no 'id_propietario'
     protected $table = 'propietarios'; // Especifica el nombre de la tabla
     protected $fillable = [
-        'id_propietario',
-        'estado',
+        'usuario_id',
+        'estado_id',
         'logo_negocio', // Añadido
         // Si los añades en la migración, inclúyelos aquí
         'nombre_negocio',
@@ -26,7 +26,7 @@ class Propietario extends Model
     // Define la relación con el modelo User
     public function user()
     {
-        return $this->belongsTo(User::class, 'id_propietario', 'id_usuario');
+        return $this->belongsTo(User::class, 'usuario_id', 'id');
     }
 
     /**
@@ -34,6 +34,6 @@ class Propietario extends Model
      */
     public function centrosDeportivos()
     {
-        return $this->hasMany(CentroDeportivo::class, 'id_propietario', 'id_propietario');
+        return $this->hasMany(CentroDeportivo::class, 'propietario_id', 'id');
     }
 }

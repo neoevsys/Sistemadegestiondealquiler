@@ -17,7 +17,7 @@
             <p class="text-lg text-blue-200 mb-6 max-w-2xl mx-auto font-normal">
                 Disfruta de una experiencia 100% online, con disponibilidad en tiempo real, pagos protegidos y la confianza de miles de usuarios. ¡Vive el deporte como nunca antes!
             </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center w-full">
+            <div class="flex flex-col gap-4 sm:flex-row sm:gap-4 justify-center w-full">
                 <a href="{{ route('centros.index') }}" class="bg-yellow-400 text-gray-900 px-8 py-4 rounded-xl text-lg font-bold hover:bg-yellow-300 transition-colors shadow-xl ring-2 ring-yellow-200/60">
                     🏟️ Ver Centros Deportivos
                 </a>
@@ -29,15 +29,33 @@
     </section>
 
     <!-- Quick Search Moderno -->
-    <section class="bg-white shadow-2xl -mt-12 mx-4 md:mx-8 rounded-2xl relative z-10 border border-blue-100">
+    <section class="bg-white shadow-2xl mt-4 md:-mt-12 mx-4 md:mx-8 rounded-2xl relative z-10 border border-blue-100 transition-all duration-300">
         <div class="max-w-6xl mx-auto p-8">
-            <form class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <form class="grid grid-cols-1 md:grid-cols-4 gap-6" method="GET" action="{{ route('home') }}">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Ubicación</label>
-                    <select class="w-full p-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50" name="ciudad">
-                        <option value="">Seleccionar ciudad</option>
-                        @foreach($ciudades as $ciudad)
-                            <option value="{{ $ciudad }}">{{ $ciudad }}</option>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Departamento</label>
+                    <select id="departamento_id" name="departamento_id" class="w-full p-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50">
+                        <option value="">Seleccionar departamento</option>
+                        @foreach($departamentos as $departamento)
+                            <option value="{{ $departamento->id }}">{{ $departamento->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Provincia</label>
+                    <select id="provincia_id" name="provincia_id" class="w-full p-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50" disabled>
+                        <option value="">Seleccionar provincia</option>
+                        @foreach($provincias as $provincia)
+                            <option value="{{ $provincia->id }}" data-departamento="{{ $provincia->departamento_id }}">{{ $provincia->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Distrito / Ciudad</label>
+                    <select id="distrito_id" name="distrito_id" class="w-full p-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50" disabled>
+                        <option value="">Seleccionar distrito</option>
+                        @foreach($distritos as $distrito)
+                            <option value="{{ $distrito->id }}" data-provincia="{{ $distrito->provincia_id }}">{{ $distrito->nombre }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -135,4 +153,42 @@
         .card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
     </style>
+    <script>
+        // Select dependientes en el frontend (sin AJAX, solo filtrado en el cliente)
+        document.addEventListener('DOMContentLoaded', function() {
+            const departamentoSelect = document.getElementById('departamento_id');
+            const provinciaSelect = document.getElementById('provincia_id');
+            const distritoSelect = document.getElementById('distrito_id');
+
+            // Inicialmente bloquea provincia y distrito
+            provinciaSelect.disabled = true;
+            distritoSelect.disabled = true;
+
+            departamentoSelect.addEventListener('change', function() {
+                const selectedDepartamento = this.value;
+                // Filtra provincias
+                Array.from(provinciaSelect.options).forEach(opt => {
+                    opt.style.display = !opt.value || opt.getAttribute('data-departamento') === selectedDepartamento ? '' : 'none';
+                });
+                provinciaSelect.value = '';
+                // Bloquea o desbloquea provincia
+                provinciaSelect.disabled = !selectedDepartamento;
+                // Reinicia y bloquea distrito
+                Array.from(distritoSelect.options).forEach(opt => { opt.style.display = !opt.value ? '' : 'none'; });
+                distritoSelect.value = '';
+                distritoSelect.disabled = true;
+            });
+
+            provinciaSelect.addEventListener('change', function() {
+                const selectedProvincia = this.value;
+                // Filtra distritos
+                Array.from(distritoSelect.options).forEach(opt => {
+                    opt.style.display = !opt.value || opt.getAttribute('data-provincia') === selectedProvincia ? '' : 'none';
+                });
+                distritoSelect.value = '';
+                // Bloquea o desbloquea distrito
+                distritoSelect.disabled = !selectedProvincia;
+            });
+        });
+    </script>
 @endsection

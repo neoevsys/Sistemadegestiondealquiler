@@ -4,21 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes; // Asegúrate de importar SoftDeletes
 
 class CentroDeportivo extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes; // Usar SoftDeletes
 
     protected $table = 'centros_deportivos';
-    protected $primaryKey = 'id_centro';
 
     protected $fillable = [
-        'id_propietario',
+        'propietario_id',
         'nombre',
         'descripcion',
         'direccion',
-        'ciudad',
-        'distrito',
+        'departamento_id',
+        'provincia_id',
+        'distrito_id',
         'codigo_postal',
         'telefono',
         'email',
@@ -27,9 +28,9 @@ class CentroDeportivo extends Model
         'servicios_adicionales',
         'politicas',
         'calificacion_promedio',
-        'estado',
+        'estado_id', // Cambiado de 'estado' a 'estado_id'
         'fecha_registro',
-        'fotos', // Nueva columna para múltiples fotos del centro deportivo (JSON)
+        'fotos',
     ];
 
     protected $casts = [
@@ -46,7 +47,7 @@ class CentroDeportivo extends Model
     public function propietario()
     {
         // belongsTo(ModeloRelacionado::class, 'clave_foranea_en_esta_tabla', 'clave_local_en_tabla_relacionada')
-        return $this->belongsTo(Propietario::class, 'id_propietario', 'id_propietario');
+        return $this->belongsTo(Propietario::class, 'propietario_id', 'id');
     }
 
     /**
@@ -54,7 +55,7 @@ class CentroDeportivo extends Model
      */
     public function instalaciones()
     {
-        return $this->hasMany(Instalacion::class, 'id_centro', 'id_centro');
+        return $this->hasMany(Instalacion::class, 'centro_id', 'id');
     }
 
     /**
@@ -62,6 +63,38 @@ class CentroDeportivo extends Model
      */
     public function evaluaciones()
     {
-        return $this->hasMany(Evaluacion::class, 'id_centro', 'id_centro');
+        return $this->hasMany(Evaluacion::class, 'centro_id', 'id');
+    }
+
+    /**
+     * Relación con departamento
+     */
+    public function departamento()
+    {
+        return $this->belongsTo(Departamento::class, 'departamento_id');
+    }
+
+    /**
+     * Relación con provincia
+     */
+    public function provincia()
+    {
+        return $this->belongsTo(Provincia::class, 'provincia_id');
+    }
+
+    /**
+     * Relación con distrito
+     */
+    public function distrito()
+    {
+        return $this->belongsTo(Distrito::class, 'distrito_id');
+    }
+
+    /**
+     * Relación con el estado del centro
+     */
+    public function estadoCentro() // Nuevo método para la relación con estados_centro
+    {
+        return $this->belongsTo(EstadoCentro::class, 'estado_id');
     }
 }

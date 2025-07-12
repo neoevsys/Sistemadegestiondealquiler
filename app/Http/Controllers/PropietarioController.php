@@ -16,7 +16,7 @@ class PropietarioController extends Controller
         $user = Auth::user();
 
         // Verificar que el usuario sea propietario
-        if ($user->tipo_usuario !== 'propietario') {
+        if ($user->tipoUsuario && $user->tipoUsuario->nombre !== 'propietario') {
             return redirect()->route('dashboard')->with('error', 'Acceso no autorizado.');
         }
 

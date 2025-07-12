@@ -9,8 +9,12 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     <div class="bg-white rounded-3xl shadow-2xl p-10 flex flex-col md:flex-row gap-10 items-center md:items-start">
         <div class="flex flex-col items-center md:w-1/3">
-            @if(Auth::user()->foto_perfil)
-                <img src="{{ asset('storage/' . Auth::user()->foto_perfil) }}" alt="Foto de perfil" class="w-48 h-48 rounded-full object-cover border-8 border-blue-500 shadow-lg mb-6">
+            @php
+                $fotoPerfil = Auth::user()->foto_perfil;
+                $isUrl = $fotoPerfil && (Str::startsWith($fotoPerfil, ['http://', 'https://']));
+            @endphp
+            @if($fotoPerfil)
+                <img src="{{ $isUrl ? $fotoPerfil : asset('storage/' . $fotoPerfil) }}" alt="Foto de perfil" class="w-48 h-48 rounded-full object-cover border-8 border-blue-500 shadow-lg mb-6">
             @else
                 <div class="w-48 h-48 rounded-full bg-blue-100 flex items-center justify-center text-7xl text-blue-400 mb-6 border-8 border-blue-200 shadow-lg">
                     <span>{{ strtoupper(substr(Auth::user()->nombre,0,1)) }}</span>
@@ -37,12 +41,22 @@
                     <div><span class="font-medium">Nombre:</span> {{ Auth::user()->nombre }}</div>
                     <div><span class="font-medium">Apellido:</span> {{ Auth::user()->apellido }}</div>
                     <div><span class="font-medium">Email:</span> {{ Auth::user()->email }}</div>
+                    <div><span class="font-medium">Tipo de Documento:</span> {{ Auth::user()->tipoDocumento->nombre ?? 'No registrado' }}</div>
+                    <div><span class="font-medium">Número de Documento:</span> {{ Auth::user()->numero_documento ?? 'No registrado' }}</div>
+                    @if(Auth::user()->tipoDocumento && Auth::user()->tipoDocumento->nombre === 'RUC')
+                        <div><span class="font-medium">Razón Social:</span> {{ Auth::user()->razon_social ?? 'No registrada' }}</div>
+                    @endif
                     <div><span class="font-medium">Teléfono:</span> {{ Auth::user()->telefono ?? 'No registrado' }}</div>
                     <div><span class="font-medium">Fecha de Nacimiento:</span> {{ Auth::user()->fecha_nacimiento ? Auth::user()->fecha_nacimiento->format('d/m/Y') : 'No registrada' }}</div>
-                    <div><span class="font-medium">Tipo de Usuario:</span> {{ ucfirst(Auth::user()->tipo_usuario) }}</div>
+                    <div><span class="font-medium">Dirección:</span> {{ Auth::user()->direccion ?? 'No registrada' }}</div>
+                    <div><span class="font-medium">Departamento:</span> {{ Auth::user()->departamento->nombre ?? '-' }}</div>
+                    <div><span class="font-medium">Provincia:</span> {{ Auth::user()->provincia->nombre ?? '-' }}</div>
+                    <div><span class="font-medium">Distrito:</span> {{ Auth::user()->distrito->nombre ?? '-' }}</div>
+                    <div><span class="font-medium">Tipo de Usuario:</span> {{ Auth::user()->tipoUsuario->nombre ?? 'N/A' }}</div>
+                    <div><span class="font-medium">Estado:</span> {{ Auth::user()->estadoUsuario->nombre ?? 'N/A' }}</div>
                 </div>
             </div>
-            @if(Auth::user()->tipo_usuario !== 'propietario')
+            @if(Auth::user()->tipo_usuario_id != 3)
             <div class="bg-purple-50 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow">
                 <div>
                     <div class="font-semibold text-purple-700 mb-1 text-lg">¿Quieres ser propietario?</div>

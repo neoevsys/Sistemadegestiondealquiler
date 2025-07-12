@@ -6,12 +6,17 @@
         <p class="text-gray-600 mb-4">{{ $centro->descripcion }}</p>
         <div class="flex flex-col md:flex-row gap-6 mb-6">
             @if($centro->fotos && is_array($centro->fotos) && count($centro->fotos) > 0)
-                <img src="{{ asset('storage/' . $centro->fotos[0]) }}" alt="Foto Centro" class="w-full md:w-80 h-56 object-cover rounded">
+                @php
+                    $foto = $centro->fotos[0];
+                    $isUrl = Str::startsWith($foto, ['http://', 'https://']);
+                @endphp
+                <img src="{{ $isUrl ? $foto : asset('storage/' . $foto) }}" alt="Foto Centro" class="w-full md:w-80 h-56 object-cover rounded">
             @endif
             <div class="flex-1">
                 <div class="mb-2"><span class="font-semibold">Dirección:</span> {{ $centro->direccion }}</div>
-                <div class="mb-2"><span class="font-semibold">Ciudad:</span> {{ $centro->ciudad }}</div>
-                <div class="mb-2"><span class="font-semibold">Distrito:</span> {{ $centro->distrito }}</div>
+                <div class="mb-2"><span class="font-semibold">Departamento:</span> {{ $centro->departamento->nombre ?? '-' }}</div>
+                <div class="mb-2"><span class="font-semibold">Provincia:</span> {{ $centro->provincia->nombre ?? '-' }}</div>
+                <div class="mb-2"><span class="font-semibold">Distrito:</span> {{ $centro->distrito->nombre ?? '-' }}</div>
                 <div class="mb-2"><span class="font-semibold">Teléfono:</span> {{ $centro->telefono }}</div>
                 <div class="mb-2"><span class="font-semibold">Email:</span> {{ $centro->email }}</div>
                 <div class="mb-2"><span class="font-semibold">Calificación:</span> {{ $centro->calificacion_promedio ?? 'N/A' }}</div>

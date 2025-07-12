@@ -10,10 +10,10 @@ class Instalacion extends Model
     use HasFactory;
 
     protected $table = 'instalaciones';
-    protected $primaryKey = 'id_instalacion';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
-        'id_centro',
+        'centro_id',
         'id_tipo_deporte',
         'nombre',
         'descripcion',
@@ -22,7 +22,7 @@ class Instalacion extends Model
         'superficie',
         'dimensiones',
         'equipamiento_incluido',
-        'estado',
+        'estado_id',
         'fotos', // Columna para múltiples fotos de la instalación (JSON)
     ];
 
@@ -37,7 +37,7 @@ class Instalacion extends Model
      */
     public function centroDeportivo()
     {
-        return $this->belongsTo(CentroDeportivo::class, 'id_centro', 'id_centro');
+        return $this->belongsTo(CentroDeportivo::class, 'centro_id', 'id');
     }
 
     /**

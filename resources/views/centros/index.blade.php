@@ -1,15 +1,34 @@
 @extends('layouts.main')
+@php use Illuminate\Support\Str; @endphp
 @section('content')
     <div class="container mx-auto py-8">
         <h1 class="text-2xl font-bold mb-6">Encuentra tu Centro Deportivo</h1>
         <!-- Filtros -->
         <form method="GET" action="{{ route('centros.index') }}" class="mb-8 bg-white rounded-lg shadow p-4 flex flex-col md:flex-row md:items-end gap-4">
             <div class="flex-1">
-                <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
-                <select name="ciudad" id="ciudad" class="w-full border-gray-300 rounded">
+                <label for="departamento_id" class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                <select name="departamento_id" id="departamento_id" class="w-full border-gray-300 rounded">
+                    <option value="">Todos</option>
+                    @foreach($departamentos as $departamento)
+                        <option value="{{ $departamento->id }}" @if(request('departamento_id') == $departamento->id) selected @endif>{{ $departamento->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="flex-1">
+                <label for="provincia_id" class="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                <select name="provincia_id" id="provincia_id" class="w-full border-gray-300 rounded">
                     <option value="">Todas</option>
-                    @foreach($ciudades as $ciudad)
-                        <option value="{{ $ciudad }}" @if(request('ciudad') == $ciudad) selected @endif>{{ $ciudad }}</option>
+                    @foreach($provincias as $provincia)
+                        <option value="{{ $provincia->id }}" data-departamento="{{ $provincia->departamento_id }}" @if(request('provincia_id') == $provincia->id) selected @endif>{{ $provincia->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="flex-1">
+                <label for="distrito_id" class="block text-sm font-medium text-gray-700 mb-1">Distrito / Ciudad</label>
+                <select name="distrito_id" id="distrito_id" class="w-full border-gray-300 rounded">
+                    <option value="">Todos</option>
+                    @foreach($distritos as $distrito)
+                        <option value="{{ $distrito->id }}" data-provincia="{{ $distrito->provincia_id }}" @if(request('distrito_id') == $distrito->id) selected @endif>{{ $distrito->nombre }}</option>
                     @endforeach
                 </select>
             </div>
@@ -53,8 +72,15 @@
             @forelse($centros as $centro)
                 <div class="bg-white rounded-2xl shadow-xl overflow-hidden card-hover flex flex-col transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl">
                     <div class="relative">
-                        @if($centro->fotos && is_array($centro->fotos) && count($centro->fotos) > 0)
-                            <img src="{{ asset('storage/' . $centro->fotos[0]) }}" alt="Foto Centro" class="h-48 w-full object-cover">
+                        @php
+                            $foto = null;
+                            if (is_array($centro->fotos) && count($centro->fotos) > 0 && !empty($centro->fotos[0])) {
+                                $foto = $centro->fotos[0];
+                            }
+                        @endphp
+                        @if($foto)
+                            @php $isUrl = Str::startsWith($foto, ['http://', 'https://']); @endphp
+                            <img src="{{ $isUrl ? $foto : asset('storage/' . $foto) }}" alt="Foto Centro" class="h-48 w-full object-cover">
                         @else
                             <div class="h-48 w-full bg-gray-200 flex items-center justify-center text-gray-400">Sin imagen</div>
                         @endif
@@ -92,7 +118,7 @@
                                 $precioMin = $precios->min();
                             @endphp
                             <span class="text-lg font-bold text-gray-900">{{ $precioMin ? number_format($precioMin, 2) . '€' : 'S/N' }}<span class="text-xs text-gray-500">/hora</span></span>
-                            <a href="{{ route('centros.show', $centro->id_centro) }}" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors">Ver detalles</a>
+                            <a href="{{ route('centros.show', $centro->id) }}" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors">Ver detalles</a>
                         </div>
                     </div>
                 </div>
@@ -104,4 +130,27 @@
             {{ $centros->links() }}
         </div>
     </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const departamentoSelect = document.getElementById('departamento_id');
+        const provinciaSelect = document.getElementById('provincia_id');
+        const distritoSelect = document.getElementById('distrito_id');
+        provinciaSelect.addEventListener('change', function() {
+            const selectedProvincia = this.value;
+            Array.from(distritoSelect.options).forEach(opt => {
+                opt.style.display = !opt.value || opt.getAttribute('data-provincia') === selectedProvincia ? '' : 'none';
+            });
+            distritoSelect.value = '';
+        });
+        departamentoSelect.addEventListener('change', function() {
+            const selectedDepartamento = this.value;
+            Array.from(provinciaSelect.options).forEach(opt => {
+                opt.style.display = !opt.value || opt.getAttribute('data-departamento') === selectedDepartamento ? '' : 'none';
+            });
+            provinciaSelect.value = '';
+            Array.from(distritoSelect.options).forEach(opt => { opt.style.display = !opt.value ? '' : 'none'; });
+            distritoSelect.value = '';
+        });
+    });
+    </script>
 @endsection

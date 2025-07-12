@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('content')
-<div class="flex items-center justify-center bg-gradient-to-r from-blue-600 to-purple-600" style="min-height:calc(100vh - 4rem - 12rem);">
+<div class="flex items-center justify-center bg-gradient-to-r from-blue-600 to-purple-600 py-12" style="min-height:calc(100vh - 8rem);">
     <div class="w-full max-w-lg">
         <div class="bg-white rounded-2xl shadow-2xl px-8 py-8">
             <div class="flex flex-col items-center mb-4">
@@ -50,7 +50,7 @@
                     <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     @error('password_confirmation')<div class="text-red-500 text-xs mt-1">{{ $message }}</div>@enderror
                 </div>
-                <div x-data="{ userType: '{{ old('tipo_usuario', 'cliente') }}' }">
+                <div x-data="{ userType: '{{ old('tipo_usuario', 'cliente') }}', tipoDoc: '{{ old('tipo_documento_id') }}' }">
                     <label for="tipo_usuario" class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Usuario</label>
                     <select id="tipo_usuario" name="tipo_usuario" x-model="userType" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="cliente">Cliente</option>
@@ -58,9 +58,24 @@
                     </select>
                     @error('tipo_usuario')<div class="text-red-500 text-xs mt-1">{{ $message }}</div>@enderror
                     <div x-show="userType === 'propietario'" class="mt-3">
-                        <label for="ruc_dni" class="block text-xs font-semibold text-gray-600 mb-1">RUC / DNI (Requerido para Propietarios)</label>
-                        <input id="ruc_dni" type="text" name="ruc_dni" value="{{ old('ruc_dni') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        @error('ruc_dni')<div class="text-red-500 text-xs mt-1">{{ $message }}</div>@enderror
+                        <label for="tipo_documento_id" class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Documento</label>
+                        <select id="tipo_documento_id" name="tipo_documento_id" x-model="tipoDoc" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Selecciona un tipo</option>
+                            @foreach($tiposDocumento as $tipo)
+                                <option value="{{ $tipo->id }}" {{ old('tipo_documento_id') == $tipo->id ? 'selected' : '' }}>{{ $tipo->nombre }}</option>
+                            @endforeach
+                        </select>
+                        @error('tipo_documento_id')<div class="text-red-500 text-xs mt-1">{{ $message }}</div>@enderror
+                    </div>
+                    <div x-show="userType === 'propietario'">
+                        <label for="numero_documento" class="block text-xs font-semibold text-gray-600 mb-1">Número de Documento</label>
+                        <input id="numero_documento" type="text" name="numero_documento" value="{{ old('numero_documento') }}" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        @error('numero_documento')<div class="text-red-500 text-xs mt-1">{{ $message }}</div>@enderror
+                    </div>
+                    <div x-show="userType === 'propietario' && tipoDoc == '2'" class="mt-3">
+                        <label for="razon_social" class="block text-xs font-semibold text-gray-600 mb-1">Razón Social (solo para RUC)</label>
+                        <input id="razon_social" type="text" name="razon_social" value="{{ old('razon_social') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        @error('razon_social')<div class="text-red-500 text-xs mt-1">{{ $message }}</div>@enderror
                     </div>
                     <div class="mt-3">
                         <label for="foto_perfil" class="block text-xs font-semibold text-gray-600 mb-1">Foto de Perfil Personal (Opcional)</label>

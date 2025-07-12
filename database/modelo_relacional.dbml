@@ -6,7 +6,9 @@ Table usuarios {
   password varchar(255)
   telefono varchar(20)
   fecha_nacimiento date
-  ruc_dni varchar(20) [unique]
+  tipo_documento_id int [ref: > tipos_documento.id]
+  numero_documento varchar(20) [unique]
+  razon_social varchar(200) // nullable, solo para propietarios con RUC
   tipo_usuario_id int [ref: > tipos_usuario.id]
   estado_id int [ref: > estados_usuario.id]
   foto_perfil varchar(255)
@@ -14,6 +16,7 @@ Table usuarios {
   created_at timestamp
   updated_at timestamp
   deleted_at timestamp
+  es_admin boolean [not null, default: false] // Indica si es el administrador principal
 }
 
 Table tipos_usuario {
@@ -51,8 +54,9 @@ Table centros_deportivos {
   nombre varchar(200)
   descripcion text
   direccion text
-  ciudad varchar(100)
-  distrito varchar(100)
+  departamento_id int [ref: > departamentos.id]
+  provincia_id int [ref: > provincias.id]
+  distrito_id int [ref: > distritos.id]
   codigo_postal varchar(10)
   telefono varchar(20)
   email varchar(150)
@@ -70,8 +74,9 @@ Table centros_deportivos {
 
   Indexes {
     (latitud, longitud)
-    ciudad
-    distrito
+    departamento_id
+    provincia_id
+    distrito_id
     codigo_postal
   }
 }
@@ -214,3 +219,33 @@ Table evaluaciones {
 // reservas 1--1 pagos
 // reservas 1--1 evaluaciones
 // centros_deportivos 1--* evaluaciones
+
+// NUEVAS TABLAS DE UBIGEO PERÚ
+Table departamentos {
+  id int [pk, increment]
+  nombre varchar(100) [not null, unique]
+}
+
+Table provincias {
+  id int [pk, increment]
+  departamento_id int [not null, ref: > departamentos.id]
+  nombre varchar(100) [not null]
+  Indexes {
+    (departamento_id, nombre) [unique]
+  }
+}
+
+Table distritos {
+  id int [pk, increment]
+  provincia_id int [not null, ref: > provincias.id]
+  nombre varchar(100) [not null]
+  Indexes {
+    (provincia_id, nombre) [unique]
+  }
+}
+
+Table tipos_documento {
+  id int [pk, increment]
+  nombre varchar(50) [not null, unique] // DNI, RUC, CE, PASAPORTE, etc.
+  descripcion varchar(100)
+}
