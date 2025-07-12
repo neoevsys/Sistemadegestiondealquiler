@@ -25,15 +25,8 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate(); // Intenta autenticar al usuario
         $request->session()->regenerate(); // Regenera la sesión
-        // --- Lógica de redirección basada en el rol ---
-        $user = Auth::user(); // Obtener el usuario autenticado
-        if ($user->tipo_usuario === 'propietario') {
-            return redirect()->intended(route('home')); // O a una ruta específica si quieres un dashboard de propietario
-        } elseif ($user->tipo_usuario === 'cliente') {
-            return redirect()->intended(route('home')); // O a una ruta específica si quieres un dashboard de cliente
-        }
-        return redirect()->intended(route('home')); // Redirección por defecto
-
+        // Redirección forzada SIEMPRE al welcome
+        return redirect()->route('welcome');
     }
     /**
      * Destroy an authenticated session.

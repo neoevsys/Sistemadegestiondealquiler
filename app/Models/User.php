@@ -3,19 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-    use Illuminate\Database\Eloquent\Factories\HasFactory;
-    use Illuminate\Foundation\Auth\User as Authenticatable;
-    use Illuminate\Notifications\Notifiable;
-    use Laravel\Fortify\TwoFactorAuthenticatable; // Si usas Fortify
-    use Laravel\Sanctum\HasApiTokens; // Si usas Sanctum
-    class User extends Authenticatable
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable; // Si usas Fortify
+use Laravel\Sanctum\HasApiTokens; // Si usas Sanctum
+use App\Models\TipoUsuario;
+use App\Models\EstadoUsuario;
+
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    // Especifica el nombre de la tabla si no sigue la convención de Laravel (plural del nombre del modelo)
     protected $table = 'usuarios';
-    // Especifica la clave primaria si no es 'id'
-    protected $primaryKey = 'id_usuario';
+    protected $primaryKey = 'id';
 
     /**
      * Los atributos que son asignables masivamente.
@@ -30,11 +31,14 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
         'password',
         'telefono',
         'fecha_nacimiento',
-        'ruc_dni',
-        'tipo_usuario',
-        'estado',
+        'tipo_documento_id',
+        'numero_documento',
+        'razon_social',
+        'tipo_usuario_id',
+        'estado_id',
         'fecha_registro',
-        'foto_perfil', // Añadido
+        'foto_perfil',
+        'es_admin',
     ];
 
     /**
@@ -54,6 +58,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
     protected $casts = [
         'fecha_registro' => 'datetime', // Convertir a objeto DateTime
         'fecha_nacimiento' => 'date',   // Convertir a objeto Date
+        'es_admin' => 'boolean',
     ];
 
     // --- Relaciones ---
@@ -64,7 +69,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
     public function reservas()
     {
         // hasMany(ModeloRelacionado::class, 'clave_foranea_en_tabla_relacionada', 'clave_local_en_esta_tabla')
-        return $this->hasMany(Reserva::class, 'id_usuario', 'id_usuario');
+        return $this->hasMany(Reserva::class, 'usuario_id', 'id');
     }
 
     /**
@@ -72,7 +77,38 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
      */
     public function evaluaciones()
     {
-        return $this->hasMany(Evaluacion::class, 'id_usuario', 'id_usuario');
+        return $this->hasMany(Evaluacion::class, 'usuario_id', 'id');
+    }
+
+    /**
+     * Un usuario puede ser un propietario.
+     */
+    public function propietario()
+    {
+        return $this->hasOne(Propietario::class, 'id', 'id'); // id del propietario es el mismo id del usuario
+    }
+
+    /**
+     * Un usuario pertenece a un tipo de usuario.
+     */
+    public function tipoUsuario()
+    {
+        return $this->belongsTo(TipoUsuario::class, 'tipo_usuario_id', 'id');
+    }
+
+    /**
+     * Un usuario tiene un estado.
+     */
+    public function estadoUsuario()
+    {
+        return $this->belongsTo(EstadoUsuario::class, 'estado_id');
+    }
+
+    /**
+     * Relación con tipo de documento
+     */
+    public function tipoDocumento()
+    {
+        return $this->belongsTo(\App\Models\TipoDocumento::class, 'tipo_documento_id');
     }
 }
-

@@ -15,9 +15,21 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            UbigeoSeeder::class,
+            TiposUsuarioSeeder::class,
+            EstadosUsuarioSeeder::class,
+            EstadosPropietarioSeeder::class,
+            EstadosCentroSeeder::class,
+            EstadosInstalacionSeeder::class,
+            EstadosHorarioSeeder::class,
+            EstadosReservaSeeder::class,
+            MetodosPagoSeeder::class,
+            EstadosPagoSeeder::class,
+            TiposDocumentoSeeder::class,
+            UsuariosSeeder::class,
+            DemoSeeder::class, // Seeder de datos de prueba completos (usuarios, propietarios, centros, instalaciones, deportes)
+            // Agrega aquí otros seeders de datos de prueba si los tienes (DemoSeeder, etc)
         ]);
     }
 }
