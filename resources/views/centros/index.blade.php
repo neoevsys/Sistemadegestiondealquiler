@@ -80,6 +80,7 @@
                         @endphp
                         @if($foto)
                             @php $isUrl = Str::startsWith($foto, ['http://', 'https://']); @endphp
+                        <!-- {{ $foto }} -->
                             <img src="{{ $isUrl ? $foto : asset('storage/' . $foto) }}" alt="Foto Centro" class="h-48 w-full object-cover">
                         @else
                             <div class="h-48 w-full bg-gray-200 flex items-center justify-center text-gray-400">Sin imagen</div>

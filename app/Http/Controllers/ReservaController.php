@@ -12,7 +12,7 @@ class ReservaController extends Controller
     public function index()
     {
         // Aquí puedes obtener las reservas del usuario autenticado
-        // $reservas = auth()->user()->reservas;
+        $reservas = auth()->user()->reservas;
         return view('reservas.index');
     }
 }

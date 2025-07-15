@@ -21,6 +21,37 @@ class CentroDeportivoController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function welcome(Request $request)
+    {
+        // Obtener los tipos de deportes, ya que pueden ser necesarios en ambas vistas (pública y de propietario)
+        $tiposDeportes = TipoDeporte::orderBy('nombre')->get();
+
+        // Obtener departamentos, provincias y distritos para selects dependientes (para la parte pública)
+        $departamentos = Departamento::orderBy('nombre')->get();
+        $provincias = Provincia::orderBy('nombre')->get();
+        $distritos = Distrito::orderBy('nombre')->get();
+        // $tiposDeportes ya se obtuvo al inicio del método
+
+        // Query base (para la parte pública)
+        $query = CentroDeportivo::query();
+
+        // Filtro por distrito (ciudad)
+        if ($request->filled('distrito_id')) {
+            $query->where('distrito_id', $request->distrito_id);
+        }
+
+        // Filtro por deporte
+        if ($request->filled('tipo_deporte_id')) {
+            $tipoDeporteId = $request->tipo_deporte_id;
+            $query->whereHas('instalaciones.tiposDeporte', function ($q) use ($tipoDeporteId) {
+                $q->where('tipos_deportes.id', $tipoDeporteId);
+            });
+        }
+
+        $centros = $query->with(['departamento', 'provincia', 'distrito', 'estadoCentro'])->paginate(10); // Paginación para la parte pública
+
+        return view('welcome', compact('centros', 'departamentos', 'provincias', 'distritos', 'tiposDeportes'));
+    }
     public function index(Request $request)
     {
         // Obtener los tipos de deportes, ya que pueden ser necesarios en ambas vistas (pública y de propietario)
@@ -72,7 +103,7 @@ class CentroDeportivoController extends Controller
 
         $centros = $query->with(['departamento', 'provincia', 'distrito', 'estadoCentro'])->paginate(10); // Paginación para la parte pública
 
-        return view('home', compact('centros', 'departamentos', 'provincias', 'distritos', 'tiposDeportes'));
+        return view('centros.index', compact('centros', 'departamentos', 'provincias', 'distritos', 'tiposDeportes'));
     }
 
     /**
@@ -84,8 +115,9 @@ class CentroDeportivoController extends Controller
         $provincias = collect(); // Vacío inicialmente, se llenará con JS
         $distritos = collect();  // Vacío inicialmente, se llenará con JS
         $estadosCentro = EstadoCentro::all(); // Obtener todos los estados de centro
+        $tiposDeportes = TipoDeporte::orderBy('nombre')->get();
 
-        return view('propietario.centros.create', compact('departamentos', 'provincias', 'distritos', 'estadosCentro'));
+        return view('propietario.centros.create', compact('departamentos', 'provincias', 'distritos', 'estadosCentro', 'tiposDeportes'));
     }
 
     /**
@@ -156,6 +188,19 @@ class CentroDeportivoController extends Controller
         $centro->load(['propietario', 'departamento', 'provincia', 'distrito', 'estadoCentro', 'instalaciones']);
         return view('propietario.centros.show', compact('centro'));
     }
+
+    /**
+     * Display the specified resource.
+     */
+    public function showPublic($id)
+    {
+        // Busca el centro por ID con las relaciones cargadas
+        $centro = CentroDeportivo::with(['propietario', 'departamento', 'provincia', 'distrito', 'estadoCentro', 'instalaciones'])
+            ->findOrFail($id);
+
+        return view('centros.show', compact('centro'));
+    }
+
 
     /**
      * Show the form for editing the specified resource.

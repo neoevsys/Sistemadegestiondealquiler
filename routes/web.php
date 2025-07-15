@@ -6,13 +6,14 @@ use App\Http\Controllers\PropietarioController;
 use App\Http\Controllers\CentroDeportivoController;
 use App\Http\Controllers\InstalacionController;
 use App\Http\Controllers\TipoDeporteController;
+use App\Models\TipoDeporte;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 
 // Rutas de autenticación generadas por Breeze (login, register, etc.)
 require __DIR__ . '/auth.php';
 // Esta será tu página de inicio unificada
-Route::get('/', [CentroDeportivoController::class, 'index'])->name('home'); // Cambiado para usar el index de CentroDeportivoController
+Route::get('/', [CentroDeportivoController::class, 'welcome'])->name('home'); // Cambiado para usar el index de CentroDeportivoController
 
 // Ruta para la landing page (welcome)
 Route::get('/welcome', function() {
@@ -25,12 +26,14 @@ Route::get('/welcome', function() {
     $provincias = DB::table('provincias')->whereIn('id', $provinciaIds)->orderBy('nombre')->get();
     $distritos = DB::table('distritos')->whereIn('id', $distritoIds)->orderBy('nombre')->get();
     $deportes = DB::table('tipos_deportes')->pluck('nombre');
-    return view('welcome', compact('departamentos', 'provincias', 'distritos', 'deportes'));
+    $tiposDeportes = TipoDeporte::orderBy('nombre')->get();
+    return view('welcome', compact('departamentos', 'provincias', 'distritos', 'deportes', 'tiposDeportes'));
 })->name('welcome');
 
 Route::get('/centros', [CentroDeportivoController::class, 'index'])->name('centros.index');
 Route::get('/instalaciones', [InstalacionController::class, 'index'])->name('instalaciones.index');
 Route::get('/deportes', [TipoDeporteController::class, 'index'])->name('tipos_deportes.index');
+Route::get('/centros/{id}', [CentroDeportivoController::class, 'showPublic'])->name('centros.show');
 
 // Ruta del dashboard general (por defecto de Breeze)
 Route::get('/dashboard', function () {
@@ -66,5 +69,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/propietario/solicitar', [\App\Http\Controllers\PropietarioController::class, 'solicitarEnviar'])->name('propietario.solicitar.enviar');
 });
 
-// Ruta pública para ver el detalle de un centro deportivo
-Route::get('/centros/{id}', [CentroDeportivoController::class, 'showPublic'])->name('centros.show');

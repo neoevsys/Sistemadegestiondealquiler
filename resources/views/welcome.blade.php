@@ -63,7 +63,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Deporte</label>
                     <select class="w-full p-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50" name="deporte">
                         <option value="">Todos los deportes</option>
-                        @foreach($deportes as $deporte)
+                        @foreach($tiposDeportes as $deporte)
                             <option value="{{ $deporte }}">{{ $deporte }}</option>
                         @endforeach
                     </select>
