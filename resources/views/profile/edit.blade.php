@@ -25,7 +25,7 @@
                     </div>
                 @endif
                 <label for="foto_perfil" class="block text-sm font-semibold text-blue-700 cursor-pointer hover:underline">Cambiar foto de perfil</label>
-                <input id="foto_perfil" name="foto_perfil" type="file" accept="image/*" class="hidden">
+                <input id="foto_perfil" name="foto_perfil" type="file" accept="image/*" class="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 @error('foto_perfil')<div class="text-red-500 text-xs mt-1">{{ $message }}</div>@enderror
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -50,12 +50,12 @@
                     @error('fecha_nacimiento')<div class="text-red-500 text-xs mt-1">{{ $message }}</div>@enderror
                 </div>
                 <div>
-                    <label for="ruc_dni" class="block text-sm font-semibold text-gray-700 mb-1">RUC / DNI</label>
-                    <input id="ruc_dni" name="ruc_dni" type="text" value="{{ old('ruc_dni', Auth::user()->ruc_dni) }}" class="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" @if(Auth::user()->tipo_usuario !== 'propietario') readonly onclick="this.removeAttribute('readonly');this.blur();" @endif>
-                    @error('ruc_dni')<div class="text-red-500 text-xs mt-1">{{ $message }}</div>@enderror
+                    <label for="numero_documento" class="block text-sm font-semibold text-gray-700 mb-1">Número de Documento</label>
+                    <input id="numero_documento" name="numero_documento" type="text" value="{{ old('numero_documento', Auth::user()->numero_documento) }}" class="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    @error('numero_documento')<div class="text-red-500 text-xs mt-1">{{ $message }}</div>@enderror
                 </div>
             </div>
-            @if(Auth::user()->tipo_usuario === 'propietario' && Auth::user()->propietario)
+            @if(Auth::user()->tipo_usuario_id === 3 && Auth::user()->propietario)
             <div class="mt-8 p-6 bg-purple-50 rounded-2xl shadow w-full">
                 <div class="text-lg font-bold text-purple-700 mb-4 flex items-center gap-2">
                     <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 01.88 7.903A4.992 4.992 0 0112 21a4.992 4.992 0 01-4.88-6.097A4 4 0 118 7h8z" /></svg>

@@ -10,7 +10,7 @@ class TipoDeporte extends Model
     use HasFactory;
 
     protected $table = 'tipos_deportes';
-    protected $primaryKey = 'id_tipo_deporte';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'nombre',
@@ -22,10 +22,10 @@ class TipoDeporte extends Model
     // --- Relaciones ---
 
     /**
-     * Un tipo de deporte puede estar asociado a muchas instalaciones.
+     * Un tipo de deporte puede estar asociado a muchas instalaciones (relación many-to-many).
      */
     public function instalaciones()
     {
-        return $this->hasMany(Instalacion::class, 'id_tipo_deporte', 'id_tipo_deporte');
+        return $this->belongsToMany(Instalacion::class, 'instalacion_tipo_deporte', 'tipo_deporte_id', 'instalacion_id');
     }
 }

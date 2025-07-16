@@ -1,18 +1,18 @@
 @extends('layouts.main')
 
 @section('content')
-<div class="py-6">
+<div class="py-8 min-h-screen bg-blue-50">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Editar Centro Deportivo</h1>
-                    <p class="mt-2 text-gray-600">Actualiza la información de {{ $centro->nombre }}</p>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-blue-900 drop-shadow mb-1">Editar Centro Deportivo</h1>
+                    <p class="mt-2 text-blue-700 text-lg">Actualiza la información de {{ $centro->nombre }}</p>
                 </div>
                 <div class="flex space-x-4">
                     <a href="{{ route('propietario.centros.show', $centro) }}" 
-                       class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition duration-200 flex items-center">
+                       class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-xl font-semibold transition duration-200 flex items-center border border-blue-200 shadow">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -20,7 +20,7 @@
                         Ver
                     </a>
                     <a href="{{ route('propietario.centros.index') }}" 
-                       class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition duration-200 flex items-center">
+                       class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-xl font-semibold transition duration-200 flex items-center border border-blue-200 shadow">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
@@ -36,12 +36,12 @@
             @method('PATCH')
             
             <!-- Información Básica -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Información Básica</h2>
+            <div class="bg-white rounded-2xl shadow-xl border border-blue-100 p-8 mb-8">
+                <h2 class="text-2xl font-bold text-blue-900 mb-6">Información Básica</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-2 gap-6">
                     <!-- Nombre -->
-                    <div class="md:col-span-2">
+                    <div class="col-span-2">
                         <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
                             Nombre del Centro <span class="text-red-500">*</span>
                         </label>
@@ -58,7 +58,7 @@
                     </div>
 
                     <!-- Descripción -->
-                    <div class="md:col-span-2">
+                    <div class="col-span-2">
                         <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-2">
                             Descripción
                         </label>
@@ -72,33 +72,8 @@
                         @enderror
                     </div>
 
-                    <!-- Estado -->
-                    <div>
-                        <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">
-                            Estado <span class="text-red-500">*</span>
-                        </label>
-                        <select id="estado" 
-                                name="estado"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('estado') border-red-500 @enderror"
-                                required>
-                            <option value="activo" {{ old('estado', $centro->estado) === 'activo' ? 'selected' : '' }}>Activo</option>
-                            <option value="inactivo" {{ old('estado', $centro->estado) === 'inactivo' ? 'selected' : '' }}>Inactivo</option>
-                            <option value="mantenimiento" {{ old('estado', $centro->estado) === 'mantenimiento' ? 'selected' : '' }}>En Mantenimiento</option>
-                        </select>
-                        @error('estado')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-            </div>
-
-            <!-- Ubicación -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Ubicación</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Dirección -->
-                    <div class="md:col-span-2">
+                    <div class="col-span-2">
                         <label for="direccion" class="block text-sm font-medium text-gray-700 mb-2">
                             Dirección <span class="text-red-500">*</span>
                         </label>
@@ -114,41 +89,71 @@
                         @enderror
                     </div>
 
-                    <!-- Ciudad -->
-                    <div>
-                        <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-2">
-                            Ciudad <span class="text-red-500">*</span>
+                    <!-- Departamento -->
+                    <div class="col-span-1">
+                        <label for="departamento_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            Departamento <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                               id="ciudad" 
-                               name="ciudad" 
-                               value="{{ old('ciudad', $centro->ciudad) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('ciudad') border-red-500 @enderror"
-                               placeholder="Ej: Lima"
-                               required>
-                        @error('ciudad')
+                        <select id="departamento_id" 
+                                name="departamento_id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('departamento_id') border-red-500 @enderror"
+                                required>
+                            <option value="">Seleccione un departamento</option>
+                            @foreach($departamentos as $departamento)
+                                <option value="{{ $departamento->id }}" {{ old('departamento_id', $centro->departamento_id) == $departamento->id ? 'selected' : '' }}>
+                                    {{ $departamento->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('departamento_id')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Provincia -->
+                    <div class="col-span-1">
+                        <label for="provincia_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            Provincia <span class="text-red-500">*</span>
+                        </label>
+                        <select id="provincia_id" 
+                                name="provincia_id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('provincia_id') border-red-500 @enderror"
+                                required>
+                            <option value="">Seleccione una provincia</option>
+                            @foreach($provincias as $provincia)
+                                <option value="{{ $provincia->id }}" {{ old('provincia_id', $centro->provincia_id) == $provincia->id ? 'selected' : '' }}>
+                                    {{ $provincia->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('provincia_id')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- Distrito -->
-                    <div>
-                        <label for="distrito" class="block text-sm font-medium text-gray-700 mb-2">
-                            Distrito
+                    <div class="col-span-1">
+                        <label for="distrito_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            Distrito <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                               id="distrito" 
-                               name="distrito" 
-                               value="{{ old('distrito', $centro->distrito) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('distrito') border-red-500 @enderror"
-                               placeholder="Ej: San Isidro">
-                        @error('distrito')
+                        <select id="distrito_id" 
+                                name="distrito_id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('distrito_id') border-red-500 @enderror"
+                                required>
+                            <option value="">Seleccione un distrito</option>
+                            @foreach($distritos as $distrito)
+                                <option value="{{ $distrito->id }}" {{ old('distrito_id', $centro->distrito_id) == $distrito->id ? 'selected' : '' }}>
+                                    {{ $distrito->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('distrito_id')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- Código Postal -->
-                    <div>
+                    <div class="col-span-1">
                         <label for="codigo_postal" class="block text-sm font-medium text-gray-700 mb-2">
                             Código Postal
                         </label>
@@ -163,8 +168,28 @@
                         @enderror
                     </div>
 
+                    <!-- Estado -->
+                    <div class="col-span-1">
+                        <label for="estado_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            Estado <span class="text-red-500">*</span>
+                        </label>
+                        <select id="estado_id" 
+                                name="estado_id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('estado_id') border-red-500 @enderror"
+                                required>
+                            @foreach($estadosCentro as $estado)
+                                <option value="{{ $estado->id }}" {{ old('estado_id', $centro->estado_id) == $estado->id ? 'selected' : '' }}>
+                                    {{ ucfirst($estado->nombre) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('estado_id')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <!-- Coordenadas -->
-                    <div>
+                    <div class="col-span-1">
                         <label for="latitud" class="block text-sm font-medium text-gray-700 mb-2">
                             Latitud
                         </label>
@@ -180,7 +205,7 @@
                         @enderror
                     </div>
 
-                    <div>
+                    <div class="col-span-1">
                         <label for="longitud" class="block text-sm font-medium text-gray-700 mb-2">
                             Longitud
                         </label>
@@ -199,12 +224,12 @@
             </div>
 
             <!-- Contacto -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Información de Contacto</h2>
+            <div class="bg-white rounded-2xl shadow-xl border border-blue-100 p-8 mb-8">
+                <h2 class="text-2xl font-bold text-blue-900 mb-6">Información de Contacto</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-2 gap-6">
                     <!-- Teléfono -->
-                    <div>
+                    <div class="col-span-1">
                         <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
                             Teléfono
                         </label>
@@ -220,7 +245,7 @@
                     </div>
 
                     <!-- Email -->
-                    <div>
+                    <div class="col-span-1">
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                             Email
                         </label>
@@ -238,12 +263,12 @@
             </div>
 
             <!-- Servicios y Políticas -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Servicios y Políticas</h2>
+            <div class="bg-white rounded-2xl shadow-xl border border-blue-100 p-8 mb-8">
+                <h2 class="text-2xl font-bold text-blue-900 mb-6">Servicios y Políticas</h2>
                 
-                <div class="space-y-6">
+                <div class="grid grid-cols-2 gap-6">
                     <!-- Servicios Adicionales -->
-                    <div>
+                    <div class="col-span-2">
                         <label for="servicios_adicionales" class="block text-sm font-medium text-gray-700 mb-2">
                             Servicios Adicionales
                         </label>
@@ -258,7 +283,7 @@
                     </div>
 
                     <!-- Políticas -->
-                    <div>
+                    <div class="col-span-2">
                         <label for="politicas" class="block text-sm font-medium text-gray-700 mb-2">
                             Políticas del Centro
                         </label>
@@ -275,8 +300,8 @@
             </div>
 
             <!-- Fotos -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Fotos del Centro</h2>
+            <div class="bg-white rounded-2xl shadow-xl border border-blue-100 p-8 mb-8">
+                <h2 class="text-2xl font-bold text-blue-900 mb-6">Fotos del Centro</h2>
                 
                 <!-- Fotos existentes -->
                 @if($centro->fotos && count($centro->fotos) > 0)
@@ -285,7 +310,10 @@
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             @foreach($centro->fotos as $index => $foto)
                                 <div class="relative group">
-                                    <img src="{{ Storage::url($foto) }}" 
+                                    @php
+                                        $photoUrl = (filter_var($foto, FILTER_VALIDATE_URL)) ? $foto : Storage::url($foto);
+                                    @endphp
+                                    <img src="{{ $photoUrl }}" 
                                          alt="Foto {{ $index + 1 }}" 
                                          class="w-full h-24 object-cover rounded-lg">
                                     <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center">
@@ -312,7 +340,7 @@
                 <!-- Agregar nuevas fotos -->
                 <div class="space-y-4">
                     <h3 class="text-lg font-medium text-gray-900">Agregar Nuevas Fotos</h3>
-                    <p class="text-gray-600 mb-4">Agrega más fotos de tu centro deportivo (máximo 5MB por imagen)</p>
+                    <p class="text-blue-700 mb-4">Agrega más fotos de tu centro deportivo (máximo 5MB por imagen)</p>
                     
                     <div class="flex items-center justify-center w-full">
                         <label for="fotos" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
@@ -343,13 +371,13 @@
             </div>
 
             <!-- Botones -->
-            <div class="flex justify-end space-x-4">
+            <div class="flex justify-end space-x-4 mt-8">
                 <a href="{{ route('propietario.centros.show', $centro) }}" 
-                   class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition duration-200">
+                   class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-6 py-3 rounded-xl font-semibold border border-blue-200 shadow transition duration-200">
                     Cancelar
                 </a>
                 <button type="submit" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200">
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow transition duration-200">
                     Actualizar Centro
                 </button>
             </div>

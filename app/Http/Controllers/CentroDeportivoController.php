@@ -83,25 +83,78 @@ class CentroDeportivoController extends Controller
         $departamentos = Departamento::orderBy('nombre')->get();
         $provincias = Provincia::orderBy('nombre')->get();
         $distritos = Distrito::orderBy('nombre')->get();
-        // $tiposDeportes ya se obtuvo al inicio del método
 
-        // Query base (para la parte pública)
-        $query = CentroDeportivo::query();
+        // Query base (para la parte pública) - solo centros activos
+        $query = CentroDeportivo::query()
+            ->whereHas('estadoCentro', function ($q) {
+                $q->where('nombre', 'activo');
+            });
+
+        // Filtro por departamento
+        if ($request->filled('departamento_id')) {
+            $query->where('departamento_id', $request->departamento_id);
+        }
+
+        // Filtro por provincia
+        if ($request->filled('provincia_id')) {
+            $query->where('provincia_id', $request->provincia_id);
+        }
 
         // Filtro por distrito (ciudad)
         if ($request->filled('distrito_id')) {
             $query->where('distrito_id', $request->distrito_id);
         }
 
-        // Filtro por deporte
-        if ($request->filled('tipo_deporte_id')) {
-            $tipoDeporteId = $request->tipo_deporte_id;
-            $query->whereHas('instalaciones.tiposDeporte', function ($q) use ($tipoDeporteId) {
-                $q->where('tipos_deportes.id', $tipoDeporteId);
+        // Filtro por deporte (por nombre)
+        if ($request->filled('deporte')) {
+            $deporteNombre = $request->deporte;
+            $query->whereHas('instalaciones.tiposDeporte', function ($q) use ($deporteNombre) {
+                $q->where('tipos_deportes.nombre', $deporteNombre);
             });
         }
 
-        $centros = $query->with(['departamento', 'provincia', 'distrito', 'estadoCentro'])->paginate(10); // Paginación para la parte pública
+        // Filtro por fecha (centros con disponibilidad en esa fecha)
+        if ($request->filled('fecha')) {
+            $fecha = $request->fecha;
+            $query->whereHas('instalaciones', function ($q) use ($fecha) {
+                $q->whereDoesntHave('reservas', function ($reservaQuery) use ($fecha) {
+                    $reservaQuery->where('fecha_reserva', $fecha)
+                        ->whereIn('estado_id', [1, 2]); // Estados: pendiente o confirmada
+                });
+            });
+        }
+
+        // Filtro por rango de precios
+        if ($request->filled('precio')) {
+            $precioRango = $request->precio;
+            $query->whereHas('instalaciones', function ($q) use ($precioRango) {
+                switch ($precioRango) {
+                    case '1': // Menos de 20€/hora
+                        $q->where('precio_por_hora', '<', 20);
+                        break;
+                    case '2': // 20€ - 40€/hora
+                        $q->whereBetween('precio_por_hora', [20, 40]);
+                        break;
+                    case '3': // Más de 40€/hora
+                        $q->where('precio_por_hora', '>', 40);
+                        break;
+                }
+            });
+        }
+
+        // Filtro por valoración
+        if ($request->filled('valoracion')) {
+            $valoracionMinima = $request->valoracion;
+            $query->whereHas('evaluaciones', function ($q) use ($valoracionMinima) {
+                $q->havingRaw('AVG(calificacion) >= ?', [$valoracionMinima]);
+            });
+        }
+
+        $centros = $query->with(['departamento', 'provincia', 'distrito', 'estadoCentro', 'instalaciones.tiposDeporte'])
+            ->withCount('evaluaciones')
+            ->withAvg('evaluaciones', 'calificacion')
+            ->paginate(10)
+            ->appends($request->query());
 
         return view('centros.index', compact('centros', 'departamentos', 'provincias', 'distritos', 'tiposDeportes'));
     }
@@ -112,8 +165,8 @@ class CentroDeportivoController extends Controller
     public function create()
     {
         $departamentos = Departamento::orderBy('nombre')->get();
-        $provincias = collect(); // Vacío inicialmente, se llenará con JS
-        $distritos = collect();  // Vacío inicialmente, se llenará con JS
+        $provincias = Provincia::orderBy('nombre')->get(); // Cargar todas las provincias
+        $distritos = Distrito::orderBy('nombre')->get();  // Cargar todos los distritos
         $estadosCentro = EstadoCentro::all(); // Obtener todos los estados de centro
         $tiposDeportes = TipoDeporte::orderBy('nombre')->get();
 
@@ -211,9 +264,9 @@ class CentroDeportivoController extends Controller
         $this->authorize('update', $centro);
 
         $departamentos = Departamento::orderBy('nombre')->get();
-        // Cargar provincias y distritos del centro existente para los selects
-        $provincias = Provincia::where('departamento_id', $centro->departamento_id)->orderBy('nombre')->get();
-        $distritos = Distrito::where('provincia_id', $centro->provincia_id)->orderBy('nombre')->get();
+        // Cargar TODAS las provincias y distritos para que funcionen los selects dependientes
+        $provincias = Provincia::orderBy('nombre')->get();
+        $distritos = Distrito::orderBy('nombre')->get();
         $estadosCentro = EstadoCentro::all();
 
         return view('propietario.centros.edit', compact('centro', 'departamentos', 'provincias', 'distritos', 'estadosCentro'));
@@ -229,13 +282,17 @@ class CentroDeportivoController extends Controller
 
         $fotos = $centro->fotos ?? []; // Mantener las fotos existentes
 
-        // Eliminar fotos si se han marcado para eliminación (ej. a través de un campo oculto)
-        // if ($request->has('fotos_a_eliminar')) {
-        //     foreach ($request->fotos_a_eliminar as $fotoPath) {
-        //         Storage::disk('public')->delete($fotoPath);
-        //         $fotos = array_diff($fotos, [$fotoPath]);
-        //     }
-        // }
+        // Eliminar fotos si se han marcado para eliminación
+        if ($request->has('fotos_eliminar')) {
+            foreach ($request->fotos_eliminar as $fotoPath) {
+                // Eliminar del almacenamiento solo si no es una URL externa
+                if (!filter_var($fotoPath, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($fotoPath);
+                }
+                // Remover de la lista de fotos
+                $fotos = array_values(array_diff($fotos, [$fotoPath]));
+            }
+        }
 
         // Añadir nuevas fotos
         if ($request->hasFile('fotos')) {
@@ -309,5 +366,34 @@ class CentroDeportivoController extends Controller
         }
 
         return back()->with('success', 'Estado del centro actualizado a: ' . ucfirst($nuevoEstadoNombre));
+    }
+
+    /**
+     * Display evaluations for a specific sports center.
+     */
+    public function evaluaciones(CentroDeportivo $centro)
+    {
+        $this->authorize('view', $centro);
+
+        // Cargar evaluaciones con relaciones
+        $evaluaciones = $centro->evaluaciones()
+            ->with(['user', 'reserva.instalacion'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        // Estadísticas de evaluaciones
+        $estadisticas = [
+            'total' => $centro->evaluaciones()->count(),
+            'promedio' => $centro->evaluaciones()->avg('calificacion') ?? 0,
+            'distribucion' => [
+                5 => $centro->evaluaciones()->where('calificacion', 5)->count(),
+                4 => $centro->evaluaciones()->where('calificacion', 4)->count(),
+                3 => $centro->evaluaciones()->where('calificacion', 3)->count(),
+                2 => $centro->evaluaciones()->where('calificacion', 2)->count(),
+                1 => $centro->evaluaciones()->where('calificacion', 1)->count(),
+            ]
+        ];
+
+        return view('propietario.centros.evaluaciones', compact('centro', 'evaluaciones', 'estadisticas'));
     }
 }

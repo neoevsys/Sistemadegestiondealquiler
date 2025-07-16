@@ -35,10 +35,12 @@ class ProfileController extends Controller
             'apellido' => 'nullable|string|max:100',
             'telefono' => 'nullable|string|max:20',
             'fecha_nacimiento' => 'nullable|date',
-            'ruc_dni' => 'nullable|string|max:20|unique:usuarios,ruc_dni,' . $user->id_usuario . ',id_usuario',
+            'numero_documento' => 'nullable|string|max:20|unique:usuarios,numero_documento,' . $user->id . ',id',
             'foto_perfil' => 'nullable|image|max:2048',
         ];
-        if ($user->tipo_usuario === 'propietario') {
+        
+        // Verificar si es propietario por el tipo_usuario_id
+        if ($user->tipo_usuario_id === 3) { // 3 = propietario
             $rules = array_merge($rules, [
                 'nombre_negocio' => 'required|string|max:200',
                 'telefono_negocio' => 'required|string|max:20',
@@ -48,32 +50,38 @@ class ProfileController extends Controller
                 'logo_negocio' => 'nullable|image|max:2048',
             ]);
         }
+        
         $validated = $request->validate($rules);
+        
         // Foto de perfil
         if ($request->hasFile('foto_perfil')) {
             if ($user->foto_perfil) {
-                Storage::delete($user->foto_perfil);
+                Storage::delete('public/' . $user->foto_perfil);
             }
             $validated['foto_perfil'] = $request->file('foto_perfil')->store('perfiles', 'public');
         }
+        
         $user->fill($validated);
         $user->save();
+        
         // Si es propietario, actualizar datos del negocio
-        if ($user->tipo_usuario === 'propietario' && $user->propietario) {
+        if ($user->tipo_usuario_id === 3 && $user->propietario) {
             $propietario = $user->propietario;
             $propietario->nombre_negocio = $request->input('nombre_negocio');
             $propietario->telefono_negocio = $request->input('telefono_negocio');
             $propietario->email_negocio = $request->input('email_negocio');
             $propietario->direccion_negocio = $request->input('direccion_negocio');
             $propietario->descripcion_negocio = $request->input('descripcion_negocio');
+            
             if ($request->hasFile('logo_negocio')) {
                 if ($propietario->logo_negocio) {
-                    Storage::delete($propietario->logo_negocio);
+                    Storage::delete('public/' . $propietario->logo_negocio);
                 }
                 $propietario->logo_negocio = $request->file('logo_negocio')->store('negocios', 'public');
             }
             $propietario->save();
         }
+        
         return redirect()->route('profile.edit')->with('status', 'profile-updated');
     }
 

@@ -29,60 +29,72 @@
     </section>
 
     <!-- Quick Search Moderno -->
-    <section class="bg-white shadow-2xl mt-4 md:-mt-12 mx-4 md:mx-8 rounded-2xl relative z-10 border border-blue-100 transition-all duration-300">
-        <div class="max-w-6xl mx-auto p-8">
-            <form class="grid grid-cols-1 md:grid-cols-4 gap-6" method="GET" action="{{ route('home') }}">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Departamento</label>
-                    <select id="departamento_id" name="departamento_id" class="w-full p-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50">
-                        <option value="">Seleccionar departamento</option>
-                        @foreach($departamentos as $departamento)
-                            <option value="{{ $departamento->id }}">{{ $departamento->nombre }}</option>
-                        @endforeach
-                    </select>
+    <section class="bg-white shadow-2xl mt-8 md:-mt-8 mx-4 md:mx-8 rounded-2xl relative z-10 border border-blue-100 transition-all duration-300">
+        <div class="max-w-6xl mx-auto p-8 md:p-12">
+            <div class="text-center mb-10">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-3">Encuentra tu campo deportivo ideal</h2>
+                <p class="text-gray-600 text-lg">Busca y reserva en segundos</p>
+            </div>
+            
+            <form method="GET" action="{{ route('centros.index') }}">
+                <!-- Primera fila: Ubicación -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Departamento</label>
+                        <select id="departamento_id" name="departamento_id" class="w-full p-4 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50 transition-colors">
+                            <option value="">Seleccionar departamento</option>
+                            @foreach($departamentos as $departamento)
+                                <option value="{{ $departamento->id }}">{{ $departamento->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Provincia</label>
+                        <select id="provincia_id" name="provincia_id" class="w-full p-4 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50 transition-colors" disabled>
+                            <option value="">Seleccionar provincia</option>
+                            @foreach($provincias as $provincia)
+                                <option value="{{ $provincia->id }}" data-departamento="{{ $provincia->departamento_id }}">{{ $provincia->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Distrito / Ciudad</label>
+                        <select id="distrito_id" name="distrito_id" class="w-full p-4 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50 transition-colors" disabled>
+                            <option value="">Seleccionar distrito</option>
+                            @foreach($distritos as $distrito)
+                                <option value="{{ $distrito->id }}" data-provincia="{{ $distrito->provincia_id }}">{{ $distrito->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Provincia</label>
-                    <select id="provincia_id" name="provincia_id" class="w-full p-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50" disabled>
-                        <option value="">Seleccionar provincia</option>
-                        @foreach($provincias as $provincia)
-                            <option value="{{ $provincia->id }}" data-departamento="{{ $provincia->departamento_id }}">{{ $provincia->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Distrito / Ciudad</label>
-                    <select id="distrito_id" name="distrito_id" class="w-full p-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50" disabled>
-                        <option value="">Seleccionar distrito</option>
-                        @foreach($distritos as $distrito)
-                            <option value="{{ $distrito->id }}" data-provincia="{{ $distrito->provincia_id }}">{{ $distrito->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Deporte</label>
-                    <select class="w-full p-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50" name="deporte">
-                        <option value="">Todos los deportes</option>
-                        @foreach($tiposDeportes as $deporte)
-                            <option value="{{ $deporte }}">{{ $deporte }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha</label>
-                    <input type="date" class="w-full p-3 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50" name="fecha" min="{{ date('Y-m-d') }}">
-                </div>
-                <div class="flex items-end">
-                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 shadow-lg transition-colors">
-                        🔍 Buscar
-                    </button>
+                
+                <!-- Segunda fila: Deporte, Fecha y Botón -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Deporte</label>
+                        <select class="w-full p-4 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50 transition-colors" name="deporte">
+                            <option value="">Todos los deportes</option>
+                            @foreach($tiposDeportes as $deporte)
+                                <option value="{{ $deporte->nombre }}">{{ $deporte->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Fecha</label>
+                        <input type="date" class="w-full p-4 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50 transition-colors" name="fecha" min="{{ date('Y-m-d') }}">
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 shadow-lg transition-all duration-300 transform hover:scale-105 text-lg">
+                            🔍 Buscar
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </section>
 
     <!-- Features Section Moderno -->
-    <section class="py-20 bg-gray-50">
+    <section class="py-24 bg-gray-50 mt-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">

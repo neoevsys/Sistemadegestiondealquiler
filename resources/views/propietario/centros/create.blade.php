@@ -301,6 +301,7 @@
     // Serializar provincias y distritos para JS
     const PROVINCIAS = @json($provincias);
     const DISTRITOS = @json($distritos);
+    
     document.addEventListener('DOMContentLoaded', function() {
         // Al enviar el formulario, concatena los deportes seleccionados a la descripción
         document.querySelector('form').addEventListener('submit', function(e) {
@@ -322,37 +323,191 @@
             select.disabled = true;
         }
 
-        departamentoSelect.addEventListener('change', function() {
+        function loadProvincias(departamentoId) {
             resetSelect(provinciaSelect, 'Seleccione una provincia');
             resetSelect(distritoSelect, 'Seleccione un distrito');
-            if (this.value) {
-                const provincias = PROVINCIAS.filter(p => p.departamento_id == this.value);
+            
+            if (departamentoId) {
+                const provincias = PROVINCIAS.filter(p => p.departamento_id == departamentoId);
                 provincias.forEach(p => {
-                    provinciaSelect.innerHTML += `<option value="${p.id}">${p.nombre}</option>`;
+                    const option = document.createElement('option');
+                    option.value = p.id;
+                    option.textContent = p.nombre;
+                    provinciaSelect.appendChild(option);
                 });
                 provinciaSelect.disabled = false;
             }
-        });
-        provinciaSelect.addEventListener('change', function() {
+        }
+
+        function loadDistritos(provinciaId) {
             resetSelect(distritoSelect, 'Seleccione un distrito');
-            if (this.value) {
-                const distritos = DISTRITOS.filter(d => d.provincia_id == this.value);
+            
+            if (provinciaId) {
+                const distritos = DISTRITOS.filter(d => d.provincia_id == provinciaId);
                 distritos.forEach(d => {
-                    distritoSelect.innerHTML += `<option value="${d.id}">${d.nombre}</option>`;
+                    const option = document.createElement('option');
+                    option.value = d.id;
+                    option.textContent = d.nombre;
+                    distritoSelect.appendChild(option);
                 });
                 distritoSelect.disabled = false;
             }
+        }
+
+        departamentoSelect.addEventListener('change', function() {
+            loadProvincias(this.value);
         });
-        // Si hay valores previos (edición o error de validación), inicializar selects
-        if (departamentoSelect.value) {
-            departamentoSelect.dispatchEvent(new Event('change'));
-            if (provinciaSelect.value) {
-                provinciaSelect.value = '{{ old('provincia_id') }}';
-                provinciaSelect.dispatchEvent(new Event('change'));
-                if (distritoSelect.value) {
-                    distritoSelect.value = '{{ old('distrito_id') }}';
-                }
+
+        provinciaSelect.addEventListener('change', function() {
+            loadDistritos(this.value);
+        });
+
+        // Inicializar selects si hay valores previos
+        const oldDepartamento = '{{ old("departamento_id") }}';
+        const oldProvincia = '{{ old("provincia_id") }}';
+        const oldDistrito = '{{ old("distrito_id") }}';
+
+        if (oldDepartamento) {
+            departamentoSelect.value = oldDepartamento;
+            loadProvincias(oldDepartamento);
+            
+            if (oldProvincia) {
+                setTimeout(() => {
+                    provinciaSelect.value = oldProvincia;
+                    loadDistritos(oldProvincia);
+                    
+                    if (oldDistrito) {
+                        setTimeout(() => {
+                            distritoSelect.value = oldDistrito;
+                        }, 100);
+                    }
+                }, 100);
             }
+        }
+
+        // Función para geocodificación inversa
+        function reverseGeocode(lat, lng) {
+            const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.address) {
+                        const address = data.address;
+                        console.log('Geocoding response:', data);
+                        
+                        // Actualizar dirección con solo road + house_number
+                        const direccionInput = document.getElementById('direccion');
+                        if (direccionInput) {
+                            let direccionCompleta = '';
+                            
+                            if (address.road) {
+                                direccionCompleta += address.road;
+                            }
+                            
+                            if (address.house_number) {
+                                direccionCompleta += (direccionCompleta ? ' ' : '') + address.house_number;
+                            }
+                            
+                            if (direccionCompleta) {
+                                direccionInput.value = direccionCompleta;
+                            }
+                        }
+                        
+                        // Actualizar código postal
+                        const codigoPostalInput = document.getElementById('codigo_postal');
+                        if (codigoPostalInput && address.postcode) {
+                            codigoPostalInput.value = address.postcode;
+                        }
+                        
+                        // Mapear departamento, provincia y distrito
+                        const stateName = address.state || address.region;
+                        const stateDistrict = address.state_district;
+                        const suburb = address.suburb || address.city_district || address.quarter;
+                        const city = address.city || address.town || address.village;
+                        
+                        console.log('Mapping location:', { stateName, stateDistrict, suburb, city });
+                        
+                        // Buscar departamento
+                        if (stateName) {
+                            // Obtener lista única de departamentos
+                            const departamentosUnicos = [];
+                            const departamentoIds = new Set();
+                            
+                            PROVINCIAS.forEach(p => {
+                                if (!departamentoIds.has(p.departamento_id)) {
+                                    departamentoIds.add(p.departamento_id);
+                                    const departamentoOption = departamentoSelect.querySelector(`option[value="${p.departamento_id}"]`);
+                                    if (departamentoOption) {
+                                        departamentosUnicos.push({
+                                            id: p.departamento_id,
+                                            nombre: departamentoOption.textContent
+                                        });
+                                    }
+                                }
+                            });
+                            
+                            const departamento = departamentosUnicos.find(d => 
+                                d.nombre && (
+                                    stateName.toLowerCase().includes(d.nombre.toLowerCase()) ||
+                                    d.nombre.toLowerCase().includes(stateName.toLowerCase())
+                                )
+                            );
+                            
+                            if (departamento) {
+                                departamentoSelect.value = departamento.id;
+                                loadProvincias(departamento.id);
+                                
+                                // Buscar provincia
+                                setTimeout(() => {
+                                    let provinciaEncontrada = null;
+                                    
+                                    // Intentar diferentes campos para la provincia
+                                    const provinciaNames = [stateDistrict, city, suburb].filter(n => n);
+                                    
+                                    for (const provinciaName of provinciaNames) {
+                                        provinciaEncontrada = PROVINCIAS.find(p => 
+                                            p.departamento_id == departamento.id && 
+                                            (provinciaName.toLowerCase().includes(p.nombre.toLowerCase()) ||
+                                             p.nombre.toLowerCase().includes(provinciaName.toLowerCase()))
+                                        );
+                                        if (provinciaEncontrada) break;
+                                    }
+                                    
+                                    if (provinciaEncontrada) {
+                                        provinciaSelect.value = provinciaEncontrada.id;
+                                        loadDistritos(provinciaEncontrada.id);
+                                        
+                                        // Buscar distrito
+                                        setTimeout(() => {
+                                            let distritoEncontrado = null;
+                                            
+                                            // Intentar diferentes campos para el distrito
+                                            const distritoNames = [suburb, city, stateDistrict].filter(n => n);
+                                            
+                                            for (const distritoName of distritoNames) {
+                                                distritoEncontrado = DISTRITOS.find(d => 
+                                                    d.provincia_id == provinciaEncontrada.id && 
+                                                    (distritoName.toLowerCase().includes(d.nombre.toLowerCase()) ||
+                                                     d.nombre.toLowerCase().includes(distritoName.toLowerCase()) ||
+                                                     d.nombre.toLowerCase().replace(/\s+/g, '') === distritoName.toLowerCase().replace(/\s+/g, ''))
+                                                );
+                                                if (distritoEncontrado) break;
+                                            }
+                                            
+                                            if (distritoEncontrado) {
+                                                distritoSelect.value = distritoEncontrado.id;
+                                            }
+                                        }, 150);
+                                    }
+                                }, 100);
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('Error en geocodificación:', error);
+                });
         }
 
         // Foto preview
@@ -412,13 +567,20 @@
                     console.log('Mapa clicado', e);
                     var lat = e.latlng.lat.toFixed(8);
                     var lng = e.latlng.lng.toFixed(8);
+                    
+                    // Actualizar campos de latitud y longitud
                     document.getElementById('latitud').value = lat;
                     document.getElementById('longitud').value = lng;
+                    
+                    // Actualizar marcador
                     if (marker) {
                         marker.setLatLng([lat, lng]);
                     } else {
                         marker = L.marker([lat, lng]).addTo(map);
                     }
+                    
+                    // Ejecutar geocodificación inversa
+                    reverseGeocode(lat, lng);
                 });
                 map.on('zoomend', function() { map.invalidateSize(); });
             }

@@ -34,6 +34,7 @@ Route::get('/centros', [CentroDeportivoController::class, 'index'])->name('centr
 Route::get('/instalaciones', [InstalacionController::class, 'index'])->name('instalaciones.index');
 Route::get('/deportes', [TipoDeporteController::class, 'index'])->name('tipos_deportes.index');
 Route::get('/centros/{id}', [CentroDeportivoController::class, 'showPublic'])->name('centros.show');
+Route::get('/faq', [\App\Http\Controllers\FaqController::class, 'index'])->name('faq.index');
 
 // Ruta del dashboard general (por defecto de Breeze)
 Route::get('/dashboard', function () {
@@ -56,6 +57,36 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('centros/{centro}/toggle-status',
                     [\App\Http\Controllers\CentroDeportivoController::class, 'toggleStatus'])
                     ->name('centros.toggle-status');
+
+        // Rutas de gestión de reservas del propietario
+        Route::get('reservas', [\App\Http\Controllers\ReservaController::class, 'propietarioReservas'])
+                    ->name('reservas.index');
+        Route::post('reservas/{reserva}/confirmar', [\App\Http\Controllers\ReservaController::class, 'confirmarReservaPropietario'])
+                    ->name('reservas.confirmar');
+        Route::post('reservas/{reserva}/cancelar', [\App\Http\Controllers\ReservaController::class, 'cancelarReservaPropietario'])
+                    ->name('reservas.cancelar');
+
+        // Rutas anidadas para centros deportivos
+        Route::prefix('centros/{centro}')->name('centros.')->group(function () {
+            // Instalaciones
+            Route::resource('instalaciones', \App\Http\Controllers\InstalacionController::class)->parameters([
+                'instalaciones' => 'instalacion'
+            ]);
+            
+            // Reservas del centro
+            Route::get('reservas', [\App\Http\Controllers\ReservaController::class, 'centroReservas'])
+                ->name('reservas');
+            
+            // Acciones de reservas para propietarios
+            Route::post('reservas/{reserva}/confirmar', [\App\Http\Controllers\ReservaController::class, 'confirmarReserva'])
+                ->name('reservas.confirmar');
+            Route::post('reservas/{reserva}/cancelar', [\App\Http\Controllers\ReservaController::class, 'cancelarReserva'])
+                ->name('reservas.cancelar');
+            
+            // Evaluaciones del centro
+            Route::get('evaluaciones', [\App\Http\Controllers\CentroDeportivoController::class, 'evaluaciones'])
+                ->name('evaluaciones');
+        });
     });
 
     // Rutas de perfil (generadas por Breeze)
@@ -64,8 +95,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile/show', function() { return view('profile.show'); })->name('profile.show');
 
+    // Rutas de reservas
     Route::get('/reservas', [\App\Http\Controllers\ReservaController::class, 'index'])->name('reservas.index');
+    Route::get('/reservas/crear', [\App\Http\Controllers\ReservaController::class, 'create'])->name('reservas.create');
+    Route::post('/reservas', [\App\Http\Controllers\ReservaController::class, 'store'])->name('reservas.store');
+    Route::get('/reservas/{id}', [\App\Http\Controllers\ReservaController::class, 'show'])->name('reservas.show');
+    Route::post('/reservas/{id}/cancelar', [\App\Http\Controllers\ReservaController::class, 'cancel'])->name('reservas.cancel');
+    Route::get('/api/horarios-disponibles', [\App\Http\Controllers\ReservaController::class, 'getAvailableHours'])->name('reservas.horarios');
+    
+    // Rutas de evaluaciones
+    Route::get('/evaluaciones/crear/{reserva}', [\App\Http\Controllers\EvaluacionController::class, 'create'])->name('evaluaciones.create');
+    Route::post('/evaluaciones/{reserva}', [\App\Http\Controllers\EvaluacionController::class, 'store'])->name('evaluaciones.store');
+    Route::get('/evaluaciones/{evaluacion}', [\App\Http\Controllers\EvaluacionController::class, 'show'])->name('evaluaciones.show');
+    
+    // Rutas de pagos
+    Route::get('/pagos/{reserva}', [\App\Http\Controllers\PagoController::class, 'showPaymentForm'])->name('pagos.form');
+    Route::post('/api/pagos/crear-token', [\App\Http\Controllers\PagoController::class, 'createPaymentToken'])->name('pagos.create-token');
+    Route::post('/api/pagos/procesar', [\App\Http\Controllers\PagoController::class, 'processPayment'])->name('pagos.process');
+    Route::get('/pagos/exito/{reserva}', [\App\Http\Controllers\PagoController::class, 'paymentSuccess'])->name('pagos.success');
+    Route::get('/pagos/rechazado/{reserva}', [\App\Http\Controllers\PagoController::class, 'paymentRefused'])->name('pagos.refused');
     Route::get('/propietario/solicitar', [\App\Http\Controllers\PropietarioController::class, 'solicitar'])->name('propietario.solicitar');
     Route::post('/propietario/solicitar', [\App\Http\Controllers\PropietarioController::class, 'solicitarEnviar'])->name('propietario.solicitar.enviar');
 });
-

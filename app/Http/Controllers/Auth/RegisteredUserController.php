@@ -34,7 +34,7 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validationRules = [
             'name' => ['required', 'string', 'max:100'],
             'apellido' => ['nullable', 'string', 'max:100'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:150', 'unique:' . User::class],
@@ -42,12 +42,18 @@ class RegisteredUserController extends Controller
             'telefono' => ['nullable', 'string', 'max:20'],
             'fecha_nacimiento' => ['nullable', 'date'],
             'tipo_usuario' => ['required', 'in:cliente,propietario'],
-            'tipo_documento_id' => ['required', 'exists:tipos_documento,id'],
-            'numero_documento' => ['required', 'string', 'max:20', 'unique:usuarios,numero_documento'],
-            'razon_social' => ['nullable', 'string', 'max:200'],
             'foto_perfil' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
-            'logo_negocio' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
-        ]);
+        ];
+
+        // Validaciones condicionales para propietarios
+        if ($request->tipo_usuario === 'propietario') {
+            $validationRules['tipo_documento_id'] = ['required', 'exists:tipos_documento,id'];
+            $validationRules['numero_documento'] = ['required', 'string', 'max:20', 'unique:usuarios,numero_documento,NULL,id,numero_documento,NULL'];
+            $validationRules['razon_social'] = ['nullable', 'string', 'max:200'];
+            $validationRules['logo_negocio'] = ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'];
+        }
+
+        $request->validate($validationRules);
 
         $fotoPerfilPath = null;
         // Lógica para guardar la foto de perfil personal (si se subió)
@@ -60,22 +66,29 @@ class RegisteredUserController extends Controller
         // Estado activo por defecto
         $estadoId = DB::table('estados_usuario')->where('nombre', 'activo')->value('id');
 
-        // Crear el usuario en la tabla 'usuarios' con todos los datos personales y la foto de perfil
-        $user = User::create([
+        // Preparar datos del usuario
+        $userData = [
             'nombre' => $request->name,
             'apellido' => $request->apellido,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'telefono' => $request->telefono,
             'fecha_nacimiento' => $request->fecha_nacimiento,
-            'tipo_documento_id' => $request->tipo_documento_id,
-            'numero_documento' => $request->numero_documento,
-            'razon_social' => $request->razon_social,
             'tipo_usuario_id' => $tipoUsuarioId,
             'estado_id' => $estadoId,
             'fecha_registro' => now(),
-            'foto_perfil' => $fotoPerfilPath, // Guardar la ruta de la foto de perfil personal
-        ]);
+            'foto_perfil' => $fotoPerfilPath,
+        ];
+
+        // Agregar datos específicos para propietarios
+        if ($request->tipo_usuario === 'propietario') {
+            $userData['tipo_documento_id'] = $request->tipo_documento_id;
+            $userData['numero_documento'] = $request->numero_documento;
+            $userData['razon_social'] = $request->razon_social;
+        }
+
+        // Crear el usuario en la tabla 'usuarios'
+        $user = User::create($userData);
 
         // Si el usuario es un propietario, crear un registro en la tabla 'propietarios'
         if ($request->tipo_usuario === 'propietario') {

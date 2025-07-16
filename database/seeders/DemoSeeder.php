@@ -92,39 +92,65 @@ class DemoSeeder extends Seeder
                         ->first();
                 }
                 // Instalaciones para cada centro
-                if ($centro && !empty($centro->id_centro)) {
-                    for ($k = 1; $k <= 2; $k++) {
-                        $nombreInstalacion = 'Instalación '.$centro->id_centro.'-'.$k;
+                if ($centro && !empty($centro->id)) {
+                    for ($k = 1; $k <= 3; $k++) {
+                        $nombreInstalacion = 'Instalación '.$centro->id.'-'.$k;
                         $instalacion = Instalacion::where('nombre', $nombreInstalacion)
-                            ->where('centro_id', $centro->id_centro)
+                            ->where('centro_id', $centro->id)
                             ->first();
                         if (!$instalacion) {
                             $fotosInstalacion = [
                                 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=600&q=80',
-                                'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80'
+                                'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80',
+                                'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80'
                             ];
                             $fotosInstalacion = array_filter($fotosInstalacion, fn($f) => !empty($f) && is_string($f));
                             if (empty($fotosInstalacion)) {
                                 $fotosInstalacion = [$placeholderFoto];
                             }
+                            
+                            // Datos variados para instalaciones
+                            $tiposInstalacion = [
+                                ['superficie' => 'Césped sintético', 'dimensiones' => '40x20', 'equipamiento' => 'Arcos, balones'],
+                                ['superficie' => 'Parquet', 'dimensiones' => '28x15', 'equipamiento' => 'Canastas, balones'],
+                                ['superficie' => 'Cemento', 'dimensiones' => '20x10', 'equipamiento' => 'Red, pelotas']
+                            ];
+                            
+                            $tipoActual = $tiposInstalacion[($k-1) % 3];
+                            
                             $instalacion = Instalacion::create([
-                                'centro_id' => $centro->id_centro,
+                                'centro_id' => $centro->id,
                                 'nombre' => $nombreInstalacion,
-                                'descripcion' => 'Instalación demo',
-                                'capacidad_maxima' => 10 + $k,
-                                'precio_por_hora' => 50 + $k*10,
-                                'superficie' => 'Césped',
-                                'dimensiones' => '40x20',
-                                'equipamiento_incluido' => 'Balón, Red',
+                                'descripcion' => 'Instalación deportiva equipada para la práctica de deportes',
+                                'capacidad_maxima' => 8 + ($k * 2),
+                                'precio_por_hora' => 25 + ($k * 15),
+                                'superficie' => $tipoActual['superficie'],
+                                'dimensiones' => $tipoActual['dimensiones'],
+                                'equipamiento_incluido' => $tipoActual['equipamiento'],
                                 'estado_id' => 1,
                                 'fotos' => $fotosInstalacion,
                             ]);
-                            // Asociar deporte a la instalación en la tabla pivote
-                            $tipoDeporteId = (($p->id+$j+$k)%10)+1;
-                            DB::table('instalacion_tipo_deporte')->insert([
-                                'instalacion_id' => $instalacion->id_instalacion,
-                                'tipo_deporte_id' => $tipoDeporteId
-                            ]);
+                            
+                            // Asociar múltiples deportes a cada instalación
+                            $deportesIds = [];
+                            switch($k) {
+                                case 1:
+                                    $deportesIds = [1, 2]; // Fútbol, Vóley
+                                    break;
+                                case 2:
+                                    $deportesIds = [3, 4]; // Básquet, Atletismo
+                                    break;
+                                case 3:
+                                    $deportesIds = [6, 7]; // Tenis, Padel
+                                    break;
+                            }
+                            
+                            foreach($deportesIds as $deporteId) {
+                                DB::table('instalacion_tipo_deporte')->insert([
+                                    'instalacion_id' => $instalacion->id,
+                                    'tipo_deporte_id' => $deporteId
+                                ]);
+                            }
                         }
                     }
                 }

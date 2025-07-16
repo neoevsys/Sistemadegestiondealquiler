@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->string('foto_perfil', 255)->nullable();
             $table->timestamp('fecha_registro')->useCurrent();
             $table->boolean('es_admin')->default(false);
+            $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
         });
