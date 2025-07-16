@@ -21,6 +21,8 @@
     <style>
         [x-cloak] { display: none !important; }
     </style>
+    
+    @yield('head')
 </head>
 
 <body class="font-sans antialiased min-h-screen flex flex-col justify-between">
@@ -58,9 +60,9 @@
                             class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
                             Deportes
                         </a>
-                        <a href="#contacto"
+                        <a href="{{ route('faq.index') }}"
                             class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
-                            Contacto
+                            FAQ
                         </a>
                     </div>
                 </div>
@@ -108,8 +110,8 @@
                                 @elseif($user->tipoUsuario && $user->tipoUsuario->nombre === 'propietario')
                                     <a href="{{ route('propietario.centros.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-green-50">Mis Centros</a>
                                     <a href="{{ route('propietario.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-green-50">Panel Propietario</a>
-                                @elseif($user->tipoUsuario && $user->tipoUsuario->nombre === 'administrador')
-                                    <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-yellow-50">Panel Admin</a>
+                                @elseif($user->es_admin)
+                                    <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-yellow-50">Panel Admin</a>
                                 @endif
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
@@ -126,7 +128,7 @@
                 <a href="{{ route('centros.index') }}" class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-base font-medium transition-colors">Centros Deportivos</a>
                 <a href="{{ route('instalaciones.index') }}" class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-base font-medium transition-colors">Instalaciones</a>
                 <a href="{{ route('tipos_deportes.index') }}" class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-base font-medium transition-colors">Deportes</a>
-                <a href="#contacto" class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-base font-medium transition-colors">Contacto</a>
+                <a href="{{ route('faq.index') }}" class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-base font-medium transition-colors">FAQ</a>
             </div>
         </div>
     </nav>
@@ -155,17 +157,14 @@
                 <div>
                     <h3 class="text-lg font-semibold mb-4">Plataforma</h3>
                     <ul class="space-y-2 text-gray-400">
-                        <li><a href="{{ route('centros.index') }}" class="hover:text-white transition-colors">Buscar Canchas</a></li>
-                        <li><a href="{{ route('propietario.dashboard') }}" class="hover:text-white transition-colors">Gestión</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Precios</a></li>
+                        <li><a href="{{ route('centros.index') }}" class="hover:text-white transition-colors">Centros</a></li>
+                        <li><a href="{{ route('instalaciones.index') }}" class="hover:text-white transition-colors">Instalaciones</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-lg font-semibold mb-4">Soporte</h3>
                     <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition-colors">Centro de Ayuda</a></li>
-                        <li><a href="#contacto" class="hover:text-white transition-colors">Contacto</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+                        <li><a href="{{ route('faq.index') }}" class="hover:text-white transition-colors">FAQ</a></li>
                     </ul>
                 </div>
                 <div>

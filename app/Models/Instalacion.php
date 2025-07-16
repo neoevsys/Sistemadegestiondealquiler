@@ -14,7 +14,6 @@ class Instalacion extends Model
 
     protected $fillable = [
         'centro_id',
-        'id_tipo_deporte',
         'nombre',
         'descripcion',
         'capacidad_maxima',
@@ -23,11 +22,14 @@ class Instalacion extends Model
         'dimensiones',
         'equipamiento_incluido',
         'estado_id',
-        'fotos', // Columna para múltiples fotos de la instalación (JSON)
+        'foto_principal',
+        'fotos_adicionales',
+        'fecha_creacion',
     ];
 
     protected $casts = [
-        'fotos' => 'array', // Laravel convertirá automáticamente el JSON a un array PHP
+        'fotos_adicionales' => 'array',
+        'fecha_creacion' => 'datetime',
     ];
 
     // --- Relaciones ---
@@ -41,11 +43,19 @@ class Instalacion extends Model
     }
 
     /**
-     * Una instalación está dedicada a un tipo de deporte.
+     * Una instalación pertenece a un estado.
      */
-    public function tipoDeporte()
+    public function estadoInstalacion()
     {
-        return $this->belongsTo(TipoDeporte::class, 'id_tipo_deporte', 'id_tipo_deporte');
+        return $this->belongsTo(\App\Models\EstadoInstalacion::class, 'estado_id', 'id');
+    }
+
+    /**
+     * Una instalación puede tener muchos tipos de deporte (relación muchos a muchos).
+     */
+    public function tiposDeporte()
+    {
+        return $this->belongsToMany(TipoDeporte::class, 'instalacion_tipo_deporte', 'instalacion_id', 'tipo_deporte_id');
     }
 
     /**
@@ -53,7 +63,7 @@ class Instalacion extends Model
      */
     public function horariosDisponibilidad()
     {
-        return $this->hasMany(HorarioDisponibilidad::class, 'id_instalacion', 'id_instalacion');
+        return $this->hasMany(HorarioDisponibilidad::class, 'instalacion_id', 'id');
     }
 
     /**
@@ -61,6 +71,6 @@ class Instalacion extends Model
      */
     public function reservas()
     {
-        return $this->hasMany(Reserva::class, 'id_instalacion', 'id_instalacion');
+        return $this->hasMany(Reserva::class, 'instalacion_id', 'id');
     }
 }

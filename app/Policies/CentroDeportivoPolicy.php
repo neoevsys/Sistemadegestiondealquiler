@@ -12,7 +12,7 @@ class CentroDeportivoPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->tipo_usuario === 'propietario' || $user->tipo_usuario === 'administrador';
+        return $user->tipoUsuario?->nombre === 'propietario' || $user->tipoUsuario?->nombre === 'administrador';
     }
 
     /**
@@ -21,13 +21,13 @@ class CentroDeportivoPolicy
     public function view(User $user, CentroDeportivo $centroDeportivo): bool
     {
         // Administradores pueden ver todos los centros
-        if ($user->tipo_usuario === 'administrador') {
+        if ($user->tipoUsuario?->nombre === 'administrador') {
             return true;
         }
 
         // Propietarios solo pueden ver sus propios centros
-        if ($user->tipo_usuario === 'propietario' && $user->propietario) {
-            return $centroDeportivo->id_propietario === $user->propietario->id_propietario;
+        if ($user->tipoUsuario?->nombre === 'propietario' && $user->propietario) {
+            return $centroDeportivo->propietario_id === $user->propietario->id;
         }
 
         return false;
@@ -38,7 +38,7 @@ class CentroDeportivoPolicy
      */
     public function create(User $user): bool
     {
-        return $user->tipo_usuario === 'propietario' && $user->propietario !== null;
+        return $user->tipoUsuario?->nombre === 'propietario' && $user->propietario !== null;
     }
 
     /**
@@ -47,13 +47,13 @@ class CentroDeportivoPolicy
     public function update(User $user, CentroDeportivo $centroDeportivo): bool
     {
         // Administradores pueden editar todos los centros
-        if ($user->tipo_usuario === 'administrador') {
+        if ($user->tipoUsuario?->nombre === 'administrador') {
             return true;
         }
 
         // Propietarios solo pueden editar sus propios centros
-        if ($user->tipo_usuario === 'propietario' && $user->propietario) {
-            return $centroDeportivo->id_propietario === $user->propietario->id_propietario;
+        if ($user->tipoUsuario?->nombre === 'propietario' && $user->propietario) {
+            return $centroDeportivo->propietario_id === $user->propietario->id;
         }
 
         return false;
@@ -65,13 +65,13 @@ class CentroDeportivoPolicy
     public function delete(User $user, CentroDeportivo $centroDeportivo): bool
     {
         // Administradores pueden eliminar todos los centros
-        if ($user->tipo_usuario === 'administrador') {
+        if ($user->tipoUsuario?->nombre === 'administrador') {
             return true;
         }
 
         // Propietarios solo pueden eliminar sus propios centros
-        if ($user->tipo_usuario === 'propietario' && $user->propietario) {
-            return $centroDeportivo->id_propietario === $user->propietario->id_propietario;
+        if ($user->tipoUsuario?->nombre === 'propietario' && $user->propietario) {
+            return $centroDeportivo->propietario_id === $user->propietario->id;
         }
 
         return false;
@@ -90,6 +90,6 @@ class CentroDeportivoPolicy
      */
     public function forceDelete(User $user, CentroDeportivo $centroDeportivo): bool
     {
-        return $user->tipo_usuario === 'administrador';
+        return $user->tipoUsuario?->nombre === 'administrador';
     }
 }

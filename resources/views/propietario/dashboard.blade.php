@@ -20,7 +20,7 @@
             @if(Auth::user()->propietario)
                 @php
                     $centros = Auth::user()->propietario->centrosDeportivos ?? collect();
-                    $centrosActivos = $centros->where('estado', 'activo')->count();
+                    $centrosActivos = $centros->where('estado_id', 1)->count(); // Asumiendo que 1 es activo
                     $totalInstalaciones = $centros->sum(function($centro) { return $centro->instalaciones->count(); });
                     $totalReservas = $centros->sum(function($centro) { 
                         return $centro->instalaciones->sum(function($instalacion) { 
@@ -67,7 +67,7 @@
                     </div>
                 </div>
             @endif
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
                 <div class="bg-white p-10 rounded-2xl shadow-xl card-hover border border-blue-100 flex flex-col items-center">
                     <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
                         <span class="text-3xl">🏟️</span>
@@ -78,16 +78,6 @@
                     </p>
                     <a href="{{ route('propietario.centros.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 w-full text-center">Ver Mis Centros</a>
                 </div>
-                <div class="bg-white p-10 rounded-2xl shadow-xl card-hover border border-green-100 flex flex-col items-center">
-                    <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-6">
-                        <span class="text-3xl">🏗️</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Administra Instalaciones</h3>
-                    <p class="text-gray-600 mb-4 text-center">
-                        Controla las instalaciones, precios, horarios y disponibilidad de tus centros.
-                    </p>
-                    <a href="#" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 w-full text-center">Ver Instalaciones</a>
-                </div>
                 <div class="bg-white p-10 rounded-2xl shadow-xl card-hover border border-purple-100 flex flex-col items-center">
                     <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
                         <span class="text-3xl">📅</span>
@@ -96,7 +86,7 @@
                     <p class="text-gray-600 mb-4 text-center">
                         Monitorea y gestiona las reservas de tus instalaciones y horarios disponibles.
                     </p>
-                    <a href="#" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 w-full text-center">Ver Reservas</a>
+                    <a href="{{ route('propietario.reservas.index') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 w-full text-center">Ver Reservas</a>
                 </div>
             </div>
             @if(Auth::user()->propietario && $centros->count() > 0)
@@ -113,10 +103,13 @@
                                 <div class="flex justify-between items-start mb-2">
                                     <h3 class="font-medium text-gray-900">{{ $centro->nombre }}</h3>
                                     <span class="px-2 py-1 rounded-full text-xs font-medium 
-                                        @if($centro->estado === 'activo') bg-green-100 text-green-800
-                                        @elseif($centro->estado === 'inactivo') bg-red-100 text-red-800
+                                        @if($centro->estado_id === 1) bg-green-100 text-green-800
+                                        @elseif($centro->estado_id === 2) bg-red-100 text-red-800
                                         @else bg-yellow-100 text-yellow-800 @endif">
-                                        {{ ucfirst($centro->estado) }}
+                                        @if($centro->estado_id === 1) Activo
+                                        @elseif($centro->estado_id === 2) Inactivo
+                                        @else Pendiente
+                                        @endif
                                     </span>
                                 </div>
                                 <p class="text-gray-600 text-sm mb-3">{{ Str::limit($centro->direccion, 50) }}</p>

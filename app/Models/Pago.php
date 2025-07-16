@@ -10,20 +10,21 @@ class Pago extends Model
     use HasFactory;
 
     protected $table = 'pagos';
-    protected $primaryKey = 'id_pago';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
-        'id_reserva',
+        'reserva_id',
         'monto',
-        'metodo_pago',
-        'estado_pago',
+        'metodo_pago_id',
+        'estado_id',
         'fecha_pago',
-        'referencia_transaccion',
-        'comprobante', // Columna para la ruta o URL del comprobante (imagen/PDF)
+        'numero_transaccion',
+        'datos_transaccion',
     ];
 
     protected $casts = [
         'fecha_pago' => 'datetime',
+        'datos_transaccion' => 'array',
     ];
 
     // --- Relaciones ---
@@ -33,6 +34,22 @@ class Pago extends Model
      */
     public function reserva()
     {
-        return $this->belongsTo(Reserva::class, 'id_reserva', 'id_reserva');
+        return $this->belongsTo(Reserva::class, 'reserva_id', 'id');
+    }
+
+    /**
+     * Un pago tiene un método de pago.
+     */
+    public function metodoPago()
+    {
+        return $this->belongsTo(MetodoPago::class, 'metodo_pago_id', 'id');
+    }
+
+    /**
+     * Un pago tiene un estado.
+     */
+    public function estadoPago()
+    {
+        return $this->belongsTo(EstadoPago::class, 'estado_id', 'id');
     }
 }

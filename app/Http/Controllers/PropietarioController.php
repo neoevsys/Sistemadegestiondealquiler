@@ -15,8 +15,8 @@ class PropietarioController extends Controller
     {
         $user = Auth::user();
 
-        // Verificar que el usuario sea propietario
-        if ($user->tipoUsuario && $user->tipoUsuario->nombre !== 'propietario') {
+        // Verificar que el usuario sea propietario (tipo_usuario_id = 3)
+        if ($user->tipo_usuario_id !== 3) {
             return redirect()->route('dashboard')->with('error', 'Acceso no autorizado.');
         }
 
@@ -37,22 +37,29 @@ class PropietarioController extends Controller
     public function solicitarEnviar(Request $request)
     {
         $user = Auth::user();
+        
         $request->validate([
             'telefono' => 'nullable|string|max:30',
             'motivo' => 'nullable|string|max:500',
         ]);
-        // Forzar instancia Eloquent User
-        $user = \App\Models\User::find($user->id_usuario);
-        $user->telefono = $request->telefono;
-        $user->tipo_usuario = 'propietario';
+        
+        // Actualizar información del usuario
+        if ($request->filled('telefono')) {
+            $user->telefono = $request->telefono;
+        }
+        
+        // Cambiar tipo de usuario a propietario (3 = propietario)
+        $user->tipo_usuario_id = 3;
         $user->save();
+        
         // Crear registro de propietario si no existe
         if (!$user->propietario) {
             \App\Models\Propietario::create([
-                'id_propietario' => $user->id_usuario,
-                'estado' => 'aprobado',
+                'usuario_id' => $user->id,
+                'estado_id' => 1, // 1 = aprobado
             ]);
         }
+        
         return redirect()->route('propietario.dashboard')->with('success', '¡Ahora eres propietario!');
     }
 }

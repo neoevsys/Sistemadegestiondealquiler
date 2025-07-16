@@ -24,7 +24,7 @@ class Propietario extends Model
     // Si no quieres que Laravel maneje automáticamente created_at y updated_at
     // public $timestamps = false; // Pero tu migración los tiene, así que déjalo por defecto
     // Define la relación con el modelo User
-    public function user()
+    public function usuario()
     {
         return $this->belongsTo(User::class, 'usuario_id', 'id');
     }

@@ -85,7 +85,7 @@ class User extends Authenticatable
      */
     public function propietario()
     {
-        return $this->hasOne(Propietario::class, 'id', 'id'); // id del propietario es el mismo id del usuario
+        return $this->hasOne(Propietario::class, 'usuario_id', 'id');
     }
 
     /**

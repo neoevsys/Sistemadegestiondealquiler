@@ -56,7 +56,7 @@
                     <div><span class="font-medium">Estado:</span> {{ Auth::user()->estadoUsuario->nombre ?? 'N/A' }}</div>
                 </div>
             </div>
-            @if(Auth::user()->tipo_usuario_id != 3)
+            @if(Auth::user()->tipo_usuario_id != 3 && !Auth::user()->es_admin)
             <div class="bg-purple-50 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow">
                 <div>
                     <div class="font-semibold text-purple-700 mb-1 text-lg">¿Quieres ser propietario?</div>
