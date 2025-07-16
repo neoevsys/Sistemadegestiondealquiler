@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,8 +12,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         $this->call([
             UbigeoSeeder::class,
             TiposUsuarioSeeder::class,
@@ -28,6 +25,7 @@ class DatabaseSeeder extends Seeder
             EstadosPagoSeeder::class,
             TiposDocumentoSeeder::class,
             UsuariosSeeder::class,
+            FaqSeeder::class, // Seeder de preguntas frecuentes
             DemoSeeder::class, // Seeder de datos de prueba completos (usuarios, propietarios, centros, instalaciones, deportes)
             // Agrega aquí otros seeders de datos de prueba si los tienes (DemoSeeder, etc)
         ]);
