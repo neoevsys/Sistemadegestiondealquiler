@@ -9,8 +9,8 @@ class EstadosPagoSeeder extends Seeder
     public function run(): void
     {
         DB::table('estados_pago')->insert([
-            ['id' => 1, 'nombre' => 'pendiente'],
-            ['id' => 2, 'nombre' => 'completado'],
+            ['id' => 1, 'nombre' => 'completado'],
+            ['id' => 2, 'nombre' => 'pendiente'],
             ['id' => 3, 'nombre' => 'fallido'],
             ['id' => 4, 'nombre' => 'reembolsado'],
         ]);

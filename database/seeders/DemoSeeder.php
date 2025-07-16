@@ -128,7 +128,8 @@ class DemoSeeder extends Seeder
                                 'dimensiones' => $tipoActual['dimensiones'],
                                 'equipamiento_incluido' => $tipoActual['equipamiento'],
                                 'estado_id' => 1,
-                                'fotos' => $fotosInstalacion,
+                                'foto_principal' => $fotosInstalacion[0] ?? $placeholderFoto,
+                                'fotos_adicionales' => count($fotosInstalacion) > 1 ? array_slice($fotosInstalacion, 1) : [],
                             ]);
                             
                             // Asociar múltiples deportes a cada instalación

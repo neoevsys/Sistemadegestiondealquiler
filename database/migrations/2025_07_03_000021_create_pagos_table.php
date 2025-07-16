@@ -8,12 +8,13 @@ return new class extends Migration {
     {
         Schema::create('pagos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('reserva_id')->constrained('reservas')->unique()->onDelete('cascade');
+            $table->foreignId('reserva_id')->constrained('reservas')->onDelete('cascade');
             $table->decimal('monto', 8, 2);
             $table->foreignId('metodo_pago_id')->constrained('metodos_pago');
             $table->foreignId('estado_id')->constrained('estados_pago');
             $table->timestamp('fecha_pago')->nullable();
-            $table->string('referencia_transaccion', 100)->unique()->nullable();
+            $table->string('numero_transaccion', 100)->nullable();
+            $table->json('datos_transaccion')->nullable();
             $table->string('comprobante', 255)->nullable();
             $table->timestamps();
         });

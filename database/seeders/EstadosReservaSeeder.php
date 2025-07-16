@@ -11,8 +11,8 @@ class EstadosReservaSeeder extends Seeder
         DB::table('estados_reserva')->insert([
             ['id' => 1, 'nombre' => 'pendiente'],
             ['id' => 2, 'nombre' => 'confirmada'],
-            ['id' => 3, 'nombre' => 'completada'],
-            ['id' => 4, 'nombre' => 'cancelada'],
+            ['id' => 3, 'nombre' => 'cancelada'],
+            ['id' => 4, 'nombre' => 'completada'],
         ]);
     }
 }
