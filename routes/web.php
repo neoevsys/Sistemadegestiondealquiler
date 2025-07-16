@@ -117,3 +117,36 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/propietario/solicitar', [\App\Http\Controllers\PropietarioController::class, 'solicitar'])->name('propietario.solicitar');
     Route::post('/propietario/solicitar', [\App\Http\Controllers\PropietarioController::class, 'solicitarEnviar'])->name('propietario.solicitar.enviar');
 });
+
+// Rutas del administrador
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+    
+    // Gestión de usuarios
+    Route::get('/usuarios', [\App\Http\Controllers\AdminController::class, 'usuarios'])->name('usuarios.index');
+    Route::post('/usuarios/{usuario}/toggle', [\App\Http\Controllers\AdminController::class, 'toggleUsuario'])->name('usuarios.toggle');
+    
+    // Gestión de propietarios
+    Route::get('/propietarios', [\App\Http\Controllers\AdminController::class, 'propietarios'])->name('propietarios.index');
+    Route::post('/propietarios/{propietario}/toggle', [\App\Http\Controllers\AdminController::class, 'togglePropietario'])->name('propietarios.toggle');
+    
+    // Gestión de centros deportivos
+    Route::get('/centros', [\App\Http\Controllers\AdminController::class, 'centros'])->name('centros.index');
+    Route::post('/centros/{centro}/toggle', [\App\Http\Controllers\AdminController::class, 'toggleCentro'])->name('centros.toggle');
+    
+    // Gestión de instalaciones
+    Route::get('/instalaciones', [\App\Http\Controllers\AdminController::class, 'instalaciones'])->name('instalaciones.index');
+    Route::post('/instalaciones/{instalacion}/toggle', [\App\Http\Controllers\AdminController::class, 'toggleInstalacion'])->name('instalaciones.toggle');
+    
+    // Gestión de reservas
+    Route::get('/reservas', [\App\Http\Controllers\AdminController::class, 'reservas'])->name('reservas.index');
+    
+    // Gestión de pagos
+    Route::get('/pagos', [\App\Http\Controllers\AdminController::class, 'pagos'])->name('pagos.index');
+    
+    // Reportes
+    Route::get('/reportes', [\App\Http\Controllers\AdminController::class, 'reportes'])->name('reportes.index');
+    
+    // Comandos del sistema
+    Route::post('/comandos/ejecutar', [\App\Http\Controllers\AdminController::class, 'ejecutarComando'])->name('comandos.ejecutar');
+});

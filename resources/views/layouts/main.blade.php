@@ -110,8 +110,8 @@
                                 @elseif($user->tipoUsuario && $user->tipoUsuario->nombre === 'propietario')
                                     <a href="{{ route('propietario.centros.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-green-50">Mis Centros</a>
                                     <a href="{{ route('propietario.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-green-50">Panel Propietario</a>
-                                @elseif($user->tipoUsuario && $user->tipoUsuario->nombre === 'administrador')
-                                    <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-yellow-50">Panel Admin</a>
+                                @elseif($user->es_admin)
+                                    <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-yellow-50">Panel Admin</a>
                                 @endif
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
