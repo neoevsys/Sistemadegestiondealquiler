@@ -49,9 +49,9 @@
                 
                 <!-- Calificación -->
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <div class="block text-sm font-medium text-gray-700 mb-2">
                         Calificación <span class="text-red-500">*</span>
-                    </label>
+                    </div>
                     <div class="flex items-center space-x-2">
                         <div class="flex" id="rating-stars">
                             @for($i = 1; $i <= 5; $i++)
